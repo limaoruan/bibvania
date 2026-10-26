@@ -1,0 +1,13 @@
+# .gitignore — BibVânia Online
+# Arquivos que NÃO devem ir para o GitHub.
+
+# Segredos e arquivos locais — nunca publicar
+# (setup_private.sql contém as chaves reais do ImgBB e da Mistral AI depois de
+#  preenchido; bibconfig.claude é o modelo de configuração usado no BibMaker)
+setup_private.sql
+bibconfig.claude
+
+# Variáveis de ambiente locais (qualquer .env), exceto modelos sem segredo
+*.env
+*.env.*
+!*.env.example

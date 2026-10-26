@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  sitemap.xml — BibVânia Online
+  Lista, para os buscadores, as páginas públicas que devem ser indexadas.
+  Só o catálogo público aparece aqui; o painel (admin.html) fica de fora de
+  propósito (também bloqueado em robots.txt).
+
+  Campos:
+    loc        endereço completo da página (atualize se o site mudar de endereço);
+    lastmod    data/hora da última mudança relevante (formato ISO 8601, -03:00 = Brasília);
+    changefreq dica de frequência de atualização do acervo;
+    priority   importância relativa (0.0 a 1.0); 1.0 = página principal.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://limaoruan.github.io/bibvania/</loc>
+    <lastmod>2026-10-08T08:18:00-03:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>

@@ -1,0 +1,25 @@
+# robots.txt — BibVânia Online
+# Regras para robôs de busca (Google, Bing etc.). Este arquivo é público e
+# NÃO é uma proteção: apenas pede educadamente que o robô não indexe. A
+# segurança real vem do login do Supabase e do RLS (ver supabase_setup.sql).
+
+# Regras para qualquer robô:
+#   • libera o catálogo público (index.html) e o restante do site;
+#   • pede para não indexar o painel do bibliotecário nem arquivos de
+#     configuração/segredos (que também estão no .gitignore).
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /setup_private.sql
+Disallow: /bibconfig.claude
+
+# Mesmas regras repetidas de forma explícita para o Googlebot.
+User-agent: Googlebot
+Allow: /
+Disallow: /admin.html
+Disallow: /setup_private.sql
+Disallow: /bibconfig.claude
+
+# Endereço do mapa do site. Se o site mudar de endereço (usuário/repositório
+# do GitHub Pages ou domínio próprio), atualize esta URL e a do sitemap.xml.
+Sitemap: https://limaoruan.github.io/bibvania/sitemap.xml

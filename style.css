@@ -1,0 +1,1888 @@
+/**
+ * BibVânia Online — style.css
+ * ===========================================================================
+ * Folha de estilos global compartilhada por todas as páginas do sistema
+ * (index.html e admin.html).
+ *
+ * ESTRUTURA DE SEÇÕES (ordem real no arquivo)
+ *   1. VARIÁVEIS E TOKENS        — Custom properties (--primary, --bg, etc.)
+ *   2. TEMA ESCURO               — Overrides para [data-theme=dark]
+ *   3. RESET E BASE              — box-sizing, *, body, scroll-behavior
+ *   4. HEADER                   — header, .header-logo, .school-name,
+ *                                  menu de atalhos (.menu-atalhos, .menu-atalhos-btn,
+ *                                  .menu-atalhos-lista, .menu-atalhos-item,
+ *                                  @keyframes menuFadeIn)
+ *   5. CONTAINER / LAYOUT        — .container, .card, .form-group, .form-row,
+ *                                  tipografia, botões, inputs, select, textarea
+ *   6. ABAS (ADMIN)              — .tabs-nav, .tab-btn, .tab-content
+ *   7. CARDS DE LIVRO            — .book-item, .book-cover-wrap, .cover-img,
+ *                                  .book-header, .book-meta-box, .book-status-row,
+ *                                  preview de capa, estrutura vertical admin,
+ *                                  barra de ações do card
+ *   8. LOGIN                     — .login-box
+ *   9. RODAPÉ                    — footer
+ *  10. LIGHTBOX E MODAIS         — .lightbox-overlay, .lightbox-img-wrap,
+ *                                  @keyframes lightbox, modal (.modal-overlay),
+ *                                  barra lateral sticky
+ *  11. BUSCA E ACESSIBILIDADE    — busca por voz (.search-voice-wrap),
+ *                                  .skip-link, .visually-hidden
+ *  12. COMPONENTES ADMIN         — cadastro IA (.ia-*, .bottom-sheet-*,
+ *                                  .last-registered-*), devoluções
+ *                                  (.urgency-badge 🔴🟡🟢⚪⚫),
+ *                                  lista de pessoas (.pessoa-card)
+ *  13. TAGS DE PALAVRAS-CHAVE    — .tag-keyword, .book-status-row
+ *  14. UTILITÁRIOS E RESPONSIVO  — utilitários, @media, @keyframes restantes
+ *
+ * TOKENS DE DESIGN (modo claro)
+ *   --primary:    #2563eb  (azul — ações principais, links)
+ *   --success:    #10b981  (verde — disponível, OK)
+ *   --danger:     #ef4444  (vermelho — erro, excluir, atrasado)
+ *   --bg:         #f1f5f9  (cinza claro — fundo da página)
+ *   --card:       #ffffff  (branco — fundo de cards)
+ *   --text:       #1e293b  (quase preto — texto principal)
+ *   --text-light: #64748b  (cinza — texto secundário)
+ *   --border:     #e2e8f0  (cinza suave — bordas)
+ *   --radius:     12px     (arredondamento padrão)
+ *
+ * MODO ESCURO
+ *   Ativado via data-theme="dark" no <html>.
+ *   Aplicado instantaneamente via script inline no <head> de cada página
+ *   (antes do CSS externo carregar) para evitar flash claro→escuro.
+ *   .no-theme-transition suprime transitions durante a troca.
+ *
+ * @author  Ruan Oliveira Lima <https://www.instagram.com/ruanoliveiralima_/>
+ * @version 1.4
+ * @year    2026
+ * @license CC-BY-SA-4.0
+ * @source  https://github.com/limaoruan/bibvania
+ */
+
+:root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --bg: #f1f5f9;
+    --card: #ffffff;
+    --text: #1e293b;
+    --text-light: #64748b;
+    --border: #e2e8f0;
+    --radius: 12px;
+    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --font-size: 16px;
+    /* Altura recalculada: Index com 3 linhas no título; admin com 4.
+       O admin soma --actions-h para os botões Editar/Excluir. */
+    /* Altura do card público recalculada para acomodar badge + botão Reservar. */
+    --cover-h: 12.5rem;
+    --cover-h-admin: 12rem;
+}
+
+[data-theme="dark"] {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --text: #f1f5f9;
+    --text-light: #94a3b8;
+    --border: #334155;
+    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    text-transform: uppercase;
+}
+
+/* Suprimir todas as transitions durante troca de tema — evita repaint global */
+.no-theme-transition *,
+.no-theme-transition *::before,
+/* Garante que pseudo-elementos também suprimam transições durante a troca de tema. */
+.no-theme-transition *::after {
+    transition: none !important;
+}
+
+html {
+    font-size: var(--font-size);
+}
+
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-size: 1rem;
+    line-height: 1.5;
+    overflow-wrap: break-word;
+}
+
+/* Acessibilidade */
+.accessibility-bar {
+    position: fixed;
+    top: 0.6rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: auto;
+    max-width: calc(100% - 2rem);
+    height: 44px;
+    background: rgba(37, 99, 235, 0.75);
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 0 1rem;
+    z-index: 1000;
+    gap: 0.5rem;
+    border-radius: 999px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+}
+
+.control-btn {
+    position: relative;
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 0.9rem;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    user-select: none;
+    transition: opacity 0.1s ease;
+    overflow: hidden;
+    white-space: nowrap;
+    min-height: 36px;
+    max-height: 36px;
+    box-sizing: border-box;
+    line-height: 1;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.control-btn:active {
+    opacity: 0.7;
+}
+
+/* Layout Base */
+header {
+    margin-top: 0;
+    background: var(--card);
+    padding: 1.25rem 1rem;
+    padding-top: calc(44px + 0.6rem + 0.75rem);
+    border-bottom: 3px solid var(--primary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    text-align: center;
+}
+
+.header-logo {
+    height: 72px;
+    width: auto;
+}
+
+header h1 {
+    font-size: 1.25rem;
+    color: var(--primary);
+    line-height: 1.2;
+}
+
+.school-name {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.1rem;
+    text-align: center;
+}
+
+.school-name span:first-child {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: 0.03em;
+}
+
+.school-name span:last-child {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-light);
+    letter-spacing: 0.02em;
+}
+
+.container {
+    padding: 1rem;
+    max-width: 800px;
+    width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+/* Navegação */
+nav {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+nav button, nav a {
+    padding: 0.75rem 1.5rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: var(--shadow);
+    width: auto;
+    min-width: 200px;
+}
+
+/* Cards */
+.card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 1rem;
+    border: 1px solid var(--border);
+}
+
+.card h2 {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Formulários */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-light);
+    margin-bottom: 0.4rem;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 1rem;
+    appearance: none;
+    text-transform: uppercase;
+}
+
+/* Autor não identificado: campo desabilitado com valor "N/A" gravado, mas exibido em branco */
+input.autor-oculto,
+input.autor-oculto:disabled {
+    color: transparent !important;
+    -webkit-text-fill-color: transparent !important;
+    text-shadow: none;
+}
+
+/* Campos onde maiúsculas não fazem sentido */
+input[type="url"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+input[type="search"],
+input[type="tel"],
+input[id*="url" i],
+input[id*="link" i],
+input[id*="pdf" i],
+input[id*="isbn" i],
+input[placeholder*="https" i],
+input[placeholder*="http" i],
+textarea[id*="url" i],
+textarea[id*="link" i],
+textarea[id*="pdf" i] {
+    text-transform: none;
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+input:disabled {
+    background-color: #cbd5e1;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+[data-theme="dark"] input:disabled {
+    background-color: #334155;
+}
+
+/* Checkbox Personalizado Verde */
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    background: var(--bg);
+    padding: 0.8rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    border: 1px solid var(--border);
+}
+
+.checkbox-container.checked {
+    border-color: var(--success);
+    background: rgba(16, 185, 129, 0.1);
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.checkbox-container input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--success);
+    cursor: pointer;
+    appearance: auto;
+}
+
+.checkbox-container input[type="checkbox"]:checked {
+    accent-color: var(--success);
+}
+
+/* Radio buttons estilizados igual checkbox */
+.checkbox-container input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--success);
+    cursor: pointer;
+    appearance: auto;
+}
+
+/* Botões de Ação */
+.btn-block {
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.1s ease, transform 0.1s ease;
+    font-size: 0.9rem;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    will-change: opacity;
+}
+
+.btn-block:active {
+    opacity: 0.82;
+    transform: scale(0.98);
+}
+
+.btn-block:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    filter: grayscale(0.4);
+}
+
+.btn-primary { background: var(--primary); color: white; }
+/* Variantes de botão por semântica de ação. */
+.btn-success { background: var(--success); color: white; }
+.btn-danger { background: var(--danger); color: white; }
+.btn-outline { background: var(--card); border: 1px solid var(--border); color: var(--text); }
+
+/* ── Abas de navegação ─────────────────────────────── */
+.tabs-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+    padding: 0.25rem;
+}
+
+#tab-select {
+    width: 100%;
+    max-width: 320px;
+    padding: 0.6rem 1rem;
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    background: var(--card);
+    color: var(--text);
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: center;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 2.5rem;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* ── CAPA DO LIVRO ─────────────────────────────────── */
+.book-cover-wrap {
+    width: 96px !important;
+    min-width: 96px !important;
+    max-width: 96px !important;
+    min-height: 148px;
+    align-self: stretch;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    position: relative;
+    /* Fundo cinza com logo desde o início — igual em todos os estados sem imagem */
+    background: #8b9aaa url('logo.png') center 35%/60% no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px; /* isola do A+/A- do usuário */
+}
+
+[data-theme="dark"] .book-cover-wrap {
+    background: #3a4a5a url('logo.png') center 35%/60% no-repeat;
+}
+
+/* has-image: fundo some quando a imagem aparece */
+.book-cover-wrap.has-image {
+    background: #8b9aaa;
+}
+
+[data-theme="dark"] .book-cover-wrap.has-image {
+    background: #3a4a5a;
+}
+
+/* capa real — ocupa tudo quando visível */
+.book-cover-wrap img.cover-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: none;
+    z-index: 2;
+    transition: opacity 0.25s ease;
+}
+
+.book-cover-wrap.capa-carregada img.cover-img {
+    display: block;
+    opacity: 0;
+}
+
+.book-cover-wrap.has-image img.cover-img {
+    opacity: 1;
+}
+
+/* Fallback: se capa-carregada mas não has-image (sem capa), garante display:none */
+.book-cover-wrap.sem-capa img.cover-img {
+    display: none !important;
+}
+
+/* overlay removido — fundo cinza já é suficiente nos dois estados */
+
+/* texto centralizado */
+/* Label: idêntico nos dois estados — carregando e sem capa */
+.book-cover-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding-bottom: 10px;
+    text-align: center;
+    font-size: 9px !important;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: 0.05em;
+    line-height: 1.5;
+    z-index: 1;
+    pointer-events: none;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+
+/* quando capa carregou: esconde overlay */
+.book-cover-wrap.capa-carregada::before { display: none; }
+/* esconde label SOMENTE quando tem imagem real — sem-capa mantém o label visível */
+.book-cover-wrap.has-image .book-cover-label { display: none; }
+
+/* ── Preview de capa no formulário de cadastro/edição ── */
+.cover-placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 4px;
+    opacity: 0.35;
+}
+
+.book-header-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    flex: 1 1 0 !important;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.book-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+    transition: border-color 0.1s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+
+/* Keyframe de entrada suave para cards ao serem inseridos no DOM. */
+@keyframes bookFadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.book-item.fadein {
+    animation: bookFadeIn 0.15s ease forwards;
+}
+
+.book-header {
+    padding: 1.25rem;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 1rem;
+    cursor: pointer;
+    position: relative;
+    align-items: stretch;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    border-bottom: 1px solid var(--border);
+}
+
+.book-title {
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: var(--primary);
+    line-height: 1.2;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.book-meta-box {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    overflow: visible; /* BUG FIX #3: Permitir conteúdo fluir naturalmente */
+}
+
+.book-meta-item {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    font-weight: 700;
+    word-break: break-word;
+    line-height: 1.3;
+}
+
+.book-meta-single {
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    max-width: 100%;
+}
+
+/* ISBN e classificação ocupam sempre uma única linha nos cards. */
+.book-meta-single:not(.meta-autor):not(.meta-categoria) {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.book-meta-item strong {
+    color: var(--text);
+}
+
+.meta-autor,
+.meta-categoria {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.book-status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+/* Variante usada no index.html: tags + badge em linhas separadas */
+.book-status-row.stacked {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.05rem;
+}
+
+.book-status-badge-row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    width: 100%;
+}
+
+.book-tags-inline {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.2rem;
+    min-width: 0;
+}
+
+/* ── Barra de ações do card (admin) — FORA do accordion para evitar conflito de clique ── */
+.book-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem 1rem;
+}
+
+.book-actions /* Tamanho mínimo de área de toque para botões pequenos — atende WCAG 2.5.5 (44×44px). */
+.btn-small {
+    width: 100%;
+    text-align: center;
+}
+
+
+.book-status-row .badge {
+    /* posição estática — flui dentro do book-header-inner */
+}
+
+.badge {
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.badge-disponivel { background: #dcfce7; color: #166534; }
+/* Badge vermelho para livro indisponível (quantidade_disponivel === 0). */
+.badge-indisponivel { background: #fee2e2; color: #991b1b; }
+
+/* BUG FIX #4: Quantidade disponível só no badge verde à direita */
+
+/* Botão Retrátil (Indicador) */
+.accordion-indicator {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    width: 24px;
+    height: 24px;
+    background: var(--bg);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: bold;
+    transition: transform 0.3s ease;
+    border: 1px solid var(--border);
+    color: var(--primary);
+}
+
+.accordion-indicator.active {
+    transform: rotate(180deg);
+    background: var(--primary);
+    color: white;
+}
+
+/* Detalhes do Livro */
+.book-details {
+    display: none;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+}
+
+.book-details > * {
+    padding: 1.25rem;
+}
+
+.book-details.active {
+    display: block;
+}
+
+
+/* Seção de Atrasados */
+.atrasados-section {
+    border: 2px solid var(--danger);
+    border-radius: var(--radius);
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    background: rgba(239, 68, 68, 0.05);
+}
+
+.atrasado-label {
+    color: var(--danger);
+    font-weight: 800;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* Login Overlay */
+#loginOverlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 2000;
+    display: block;
+    overflow-y: auto;
+}
+
+.login-box {
+    background: var(--card);
+    width: 100%;
+    padding: 2rem;
+    padding-top: calc(44px + 0.6rem + 0.75rem);
+    border-radius: 0;
+    text-align: center;
+}
+
+@media (min-width: 600px) {
+    #loginOverlay {
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+    }
+    .login-box {
+        max-width: 480px;
+        margin-top: 2rem;
+        border-radius: 16px;
+    }
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 2rem;
+    font-size: 0.7rem;
+    color: var(--text-light);
+    font-weight: 600;
+    background: var(--card);
+    border-top: 3px solid var(--green);
+}
+
+/* Utilitários */
+.hidden { display: none !important; }
+
+@media (min-width: 600px) {
+    /* Tamanho do título principal no cabeçalho do admin. */
+header h1 { font-size: 1.75rem; }
+}
+
+/* ── Lightbox de capa ── */
+.book-cover-wrap.has-image {
+    cursor: zoom-in;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+/* Cursor pointer e leve escurecimento ao hover em capas clicáveis (abre lightbox). */
+.book-cover-wrap.has-image:hover {
+    transform: scale(1.06);
+    box-shadow: 0 4px 16px rgba(37,99,235,0.18);
+}
+
+.lightbox-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 1.5rem;
+    animation: lbFadeIn 0.2s ease;
+}
+/* Torna o lightbox visível — ativado via classList.add("open"). */
+.lightbox-overlay.open { display: flex; }
+
+.lightbox-bg {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(4px);
+    cursor: zoom-out;
+}
+
+.lightbox-img-wrap {
+    position: relative;
+    z-index: 1;
+    max-width: min(360px, 90vw);
+    max-height: 75vh;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+    animation: lbPopIn 0.22s cubic-bezier(0.34,1.56,0.64,1);
+}
+/* Imagem dentro do lightbox: tamanho máximo e object-fit para não distorcer. */
+.lightbox-img-wrap img {
+    display: block;
+    width: 100%;
+    max-height: 75vh;
+    object-fit: contain;
+}
+/* Título do livro exibido abaixo da capa no lightbox. */
+.lightbox-img-title {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.65));
+    color: white;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 1.5rem 1rem 0.75rem;
+    text-align: center;
+}
+
+.lightbox-back {
+    position: relative;
+    z-index: 1;
+    margin-top: 1rem;
+    background: white;
+    color: var(--primary);
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 2rem;
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+    transition: background 0.15s, transform 0.1s;
+}
+/* Feedback visual no botão "← VOLTAR" do lightbox. */
+.lightbox-back:hover { background: #eff6ff; transform: scale(1.03); }
+
+/* Keyframes do lightbox: lbFadeIn escurece o overlay; lbPopIn amplia a imagem do centro. */
+@keyframes lbFadeIn { from { opacity: 0 } to { opacity: 1 } }
+@keyframes lbPopIn {
+    from { transform: scale(0.85); opacity: 0; }
+    to   { transform: scale(1);    opacity: 1; }
+}
+
+/* btn-small — botões de ação dentro dos empréstimos */
+.btn-small {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.8rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: 700;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    transition: opacity 0.1s ease;
+}
+/* Feedback de pressionar (scale down) para botões pequenos — melhora UX em touch. */
+.btn-small:active {
+    opacity: 0.75;
+}
+/* Estado desabilitado — cinza e não-clicável */
+.btn-small:disabled,
+.btn-small[disabled] {
+    background: #94a3b8 !important;
+    color: #fff !important;
+    cursor: not-allowed !important;
+    opacity: 0.7;
+}
+
+/* Esconde img de capa antes de ter src válido — especificidade alta para vencer qualquer display:block */
+.book-cover-wrap img.cover-img:not([src]),
+/* Oculta <img> com src vazio — evita ícone de imagem quebrada antes de _injetarCapas preencher o src. */
+.book-cover-wrap img.cover-img[src=""] {
+    display: none !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ACESSIBILIDADE W3C / WCAG 2.1 AA
+   ══════════════════════════════════════════════════════════════ */
+
+/* Skip link — pula direto para conteúdo principal */
+.skip-link {
+    position: absolute;
+    top: -100%;
+    left: 0;
+    background: var(--primary);
+    color: #fff;
+    padding: 0.75rem 1.25rem;
+    font-weight: 700;
+    font-size: 0.85rem;
+    z-index: 9999;
+    border-radius: 0 0 8px 0;
+    text-decoration: none;
+    transition: top 0.15s ease;
+}
+/* Torna o skip link visível apenas ao receber foco via teclado — WCAG 2.4.1. */
+.skip-link:focus {
+    top: 0;
+}
+
+/* Visually hidden — acessível por leitores de tela, invisível visualmente */
+.visually-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0,0,0,0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+/* Foco visível em todos os elementos interativos — WCAG 2.4.7 */
+:focus-visible {
+    outline: 3px solid var(--primary) !important;
+    outline-offset: 2px !important;
+    border-radius: 4px;
+}
+
+/* Botões e inputs não devem suprimir outline */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+    outline: 3px solid var(--primary) !important;
+    outline-offset: 2px !important;
+}
+
+/* Remover outline apenas quando não é foco via teclado */
+button:focus:not(:focus-visible),
+/* Remove outline apenas quando o foco NÃO é via teclado (mouse/touch) — preserva acessibilidade de teclado. */
+a:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* Alto contraste — respeitar preferência do sistema */
+@media (forced-colors: active) {
+    /* Em modo de alto contraste do sistema, força borda visível em botões que usam apenas cor para se distinguir. */
+.btn-primary, .btn-success, .btn-danger {
+        border: 2px solid ButtonText;
+    }
+    /* Em alto contraste, garante que badges de disponibilidade sejam legíveis independente de fundo colorido. */
+.badge-disponivel, .badge-indisponivel {
+        border: 1px solid ButtonText;
+    }
+}
+
+/* Reduzir animações para usuários sensíveis */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Tamanho mínimo de área de toque — WCAG 2.5.5
+   Usando pseudo-elemento para ampliar área clicável SEM alterar tamanho visual */
+.btn-small {
+    position: relative;
+}
+.btn-small::after,
+.control-btn::after,
+/* Ponto indicador animado que aparece sobre o botão de voz durante a gravação (estado .ouvindo). */
+.voice-btn::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   BUSCA POR VOZ
+   ══════════════════════════════════════════════════════════════ */
+/* Container flex do campo de busca com os botões de voz e limpar posicionados à direita dentro do input. */
+.search-voice-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.search-voice-wrap input[type="text"],
+.search-voice-wrap input[type="search"] {
+    padding-right: 3rem;
+    width: 100%;
+}
+/* Dois botões visíveis: X + voz */
+.search-voice-wrap:has(.clear-btn[style*="flex"]) input {
+    padding-right: 5rem;
+}
+/* Botão "✕" de limpar busca: posicionado absolutamente dentro do .search-voice-wrap, à esquerda do botão de voz. */
+.clear-btn {
+    position: absolute;
+    right: 2.6rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-light);
+    font-size: 0.75rem;
+    font-weight: 700;
+    transition: color 0.15s, background 0.15s;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    padding: 0;
+}
+.clear-btn:hover { background: var(--bg); color: var(--danger); }
+/* Suprimir botão X nativo do browser em input[type="search"] — usamos o nosso */
+input[type="search"]::-webkit-search-cancel-button,
+/* Remove o botão nativo de cancelar do input[type=search] no Chrome/Safari — usamos o nosso próprio .clear-btn. */
+input[type="search"]::-webkit-search-decoration { -webkit-appearance: none; appearance: none; }
+input[type="search"] { appearance: none; -webkit-appearance: none; }
+.voice-btn {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    min-height: 36px;
+    min-width: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-light);
+    transition: color 0.15s, background 0.15s;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    padding: 0;
+}
+.voice-btn:hover { background: var(--bg); color: var(--primary); }
+.voice-btn.ouvindo {
+    color: var(--danger);
+    animation: pulse-mic 1s infinite;
+}
+.voice-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+/* Keyframe de pulso do ponto indicador de gravação no botão de voz. */
+@keyframes pulse-mic {
+    0%, 100% { opacity: 1; transform: translateY(-50%) scale(1); }
+    50% { opacity: 0.6; transform: translateY(-50%) scale(1.15); }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CAMPO ALT TEXT MANUAL NO UPLOAD DE CAPA
+   ══════════════════════════════════════════════════════════════ */
+/* Grupo do campo de texto alternativo (alt text) da capa — exibido apenas quando uma imagem é selecionada. */
+.alt-text-group {
+    margin-top: 0.5rem;
+    animation: fadeInAlt 0.2s ease;
+}
+@keyframes fadeInAlt {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Respeitar preferência de cor do sistema quando não há preferência salva */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) {
+        --bg: #0f172a;
+        --card: #1e293b;
+        --text: #f1f5f9;
+        --text-light: #94a3b8;
+        --border: #334155;
+    }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   MODAL — acessibilidade e foco (WCAG 2.1)
+   ══════════════════════════════════════════════════════════════ */
+/* Overlay de modal: cobre toda a tela com fundo semitransparente, centralizando o conteúdo via flex. */
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.7);
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    overflow-y: auto;
+}
+.modal.hidden { display: none !important; }
+.modal-content {
+    background: var(--card);
+    width: 100%;
+    max-width: 500px;
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,.35);
+    position: relative;
+}
+.modal-close-btn {
+    position: absolute;
+    top: 0.55rem;
+    right: 0.7rem;
+    width: 2rem;
+    height: 2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-light);
+    font: inherit;
+    font-size: 1.55rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    z-index: 1;
+}
+.modal-close-btn:hover,
+.modal-close-btn:focus-visible {
+    background: var(--bg);
+    color: var(--danger);
+    outline: none;
+}
+.loan-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ADMIN — abas, cabeçalho editável
+   ══════════════════════════════════════════════════════════════ */
+.tab-content { display: none !important; }
+.tab-content.active { display: block !important; }
+.school-header-edit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+.edit-school-btn {
+    background: var(--primary);
+    border: none;
+    color: #fff;
+    padding: 0.3rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    cursor: pointer;
+}
+
+/* Relatórios — pré-visualização */
+#previewRelatorio {
+    background: var(--card);
+    padding: 1.5rem;
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.78rem;
+    white-space: pre-wrap;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    margin-top: 1rem;
+    color: var(--text);
+    line-height: 1.5;
+}
+
+/* ── Tags de palavras-chave ──────────────────────────────────── */
+.tag-keyword {
+    display: inline;
+    background: none;
+    color: #60a5fa;
+    border-radius: 0;
+    padding: 0;
+    font-size: 0.68rem;
+    font-weight: 700;
+    transition: opacity 0.15s;
+    user-select: none;
+    white-space: nowrap;
+}
+.tag-keyword:hover { opacity: 0.7; transform: none; }
+.tag-keyword.tag-static {
+    cursor: default;
+    pointer-events: none;
+}
+.tag-keyword.tag-static:hover { opacity: 1; }
+
+/* ══════════════════════════════════════════════════════════════
+   ACERVO — cards horizontais em escala ~50%
+   Uma coluna (como sempre), tudo proporcional ao original.
+
+   Original → Escalado
+   Capa:    96×148px → 48×74px
+   Padding: 1.25rem  → 0.6rem
+   Gap:     1rem     → 0.5rem
+   Título:  1.1rem   → 0.62rem
+   Meta:    0.8rem   → 0.6rem
+   Badge:   0.75rem  → 0.58rem
+   ══════════════════════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════════════════════
+   ACERVO PÚBLICO (index) — cards com altura fixa = --cover-h
+   ══════════════════════════════════════════════════════════════ */
+
+#listaLivros .book-item {
+    padding: 0;
+    gap: 0;
+    margin-bottom: 0.3rem;
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    height: var(--cover-h);
+    min-height: var(--cover-h);
+    max-height: var(--cover-h);
+}
+
+/* Lista de livros (#listaLivros): ajustes do cabeçalho do card — capa, título, metadados, etiquetas e indicador do accordion. */
+#listaLivros .book-header {
+    flex: 1;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: stretch !important;
+    padding: 0;
+    gap: 0;
+    overflow: hidden;
+    height: 100%;
+}
+
+#listaLivros .book-cover-wrap {
+    width: calc(var(--cover-h) * 4 / 5) !important;
+    min-width: calc(var(--cover-h) * 4 / 5) !important;
+    max-width: calc(var(--cover-h) * 4 / 5) !important;
+    height: 100% !important;
+    min-height: unset !important;
+    max-height: unset !important;
+    align-self: stretch !important;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    position: relative !important;
+    display: block !important;
+    overflow: hidden !important;
+    border-radius: var(--radius) 0 0 var(--radius) !important;
+}
+
+#listaLivros .book-cover-wrap img.cover-img {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+}
+
+#listaLivros .book-cover-wrap.sem-capa img.cover-img {
+    display: none !important;
+}
+
+#listaLivros .book-cover-wrap .book-cover-label {
+    position: absolute;
+    inset: 0;
+}
+
+#listaLivros .book-header-inner {
+    height: 100%;
+    min-height: unset;
+    gap: 0;
+    justify-content: flex-start;
+    padding: 0.5rem 0.75rem;
+    flex: 1 1 0;
+    min-width: 0;
+    overflow: hidden;
+}
+
+#listaLivros .book-status-row {
+    width: 100%;
+    align-self: flex-end;
+    margin-top: auto;
+}
+
+#listaLivros .book-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1.15;
+    margin-bottom: 0.2rem;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 0.75rem;
+}
+
+#listaLivros .book-meta-item {
+    font-size: 0.68rem;
+    overflow: hidden;
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
+#listaLivros .book-meta-item.meta-autor {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+#listaLivros .book-meta-item.meta-categoria {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+#listaLivros .book-tags-inline {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+#listaLivros .badge       { font-size: 0.64rem; padding: 0.1rem 0.3rem; }
+#listaLivros .tag-keyword { font-size: 0.64rem; }
+
+#listaLivros .accordion-indicator {
+    width: 14px; height: 14px; font-size: 0.5rem; top: 0.4rem; right: 0.4rem;
+}
+
+#listaLivros .book-details > * { padding: 0.75rem 0.6rem; }
+
+#listaLivros .book-status-row.stacked {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.1rem;
+    margin-top: auto;
+    width: 100%;
+    align-self: stretch;
+}
+
+#listaLivros .book-status-badge-row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    width: 100%;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ADMIN — cards com altura fixa idêntica ao index
+   Header = --cover-h fixo; botões abaixo com separador visual.
+   ══════════════════════════════════════════════════════════════ */
+
+/* Altura dos botões de ação — usada para estabilizar as setas */
+:root { --actions-h: 2.1rem; }
+
+/* book-item: altura mínima padrão — cresce se o conteúdo precisar */
+#tab-registro .book-item,
+#secaoAtrasadosAdmin .book-item {
+    flex-direction: column !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    align-items: stretch !important;
+    min-height: calc(var(--cover-h-admin) + var(--actions-h)) !important;
+    height: calc(var(--cover-h-admin) + var(--actions-h)) !important;
+    max-height: calc(var(--cover-h-admin) + var(--actions-h)) !important;
+}
+
+/* book-header: min-height = cover-h, cresce se precisar, flex para capa esticar */
+#tab-registro .book-header,
+#secaoAtrasadosAdmin .book-header {
+    width: 100% !important;
+    cursor: default !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: stretch !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    min-height: var(--cover-h-admin) !important;
+    height: var(--cover-h-admin) !important;
+    max-height: var(--cover-h-admin) !important;
+    /* Separador visual entre card e botões */
+    border-bottom: 1px solid var(--border) !important;
+}
+
+/* Miniatura: largura proporcional, altura mínima = cover-h, estica com o card */
+#tab-registro .book-cover-wrap,
+#secaoAtrasadosAdmin .book-cover-wrap {
+    width: calc(var(--cover-h-admin) * 4 / 5) !important;
+    min-width: calc(var(--cover-h-admin) * 4 / 5) !important;
+    max-width: calc(var(--cover-h-admin) * 4 / 5) !important;
+    /* height fixa = cover-h-admin para padronizar todos os cards */
+    height: var(--cover-h-admin) !important;
+    min-height: var(--cover-h-admin) !important;
+    max-height: var(--cover-h-admin) !important;
+    align-self: stretch !important;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    border-radius: var(--radius) 0 0 0 !important;
+}
+
+/* Spacer invisível que força a altura — a imagem absoluta fica em cima */
+#tab-registro .book-cover-wrap::before,
+#secaoAtrasadosAdmin .book-cover-wrap::before {
+    content: '';
+    display: block;
+    width: 100%;
+    flex: 1 1 auto;
+    min-height: var(--cover-h-admin);
+}
+
+#tab-registro .book-cover-wrap img.cover-img,
+#secaoAtrasadosAdmin .book-cover-wrap img.cover-img {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+}
+
+#tab-registro .book-cover-wrap.sem-capa img.cover-img,
+#secaoAtrasadosAdmin .book-cover-wrap.sem-capa img.cover-img {
+    display: none !important;
+}
+
+#tab-registro .book-cover-wrap .book-cover-label,
+#secaoAtrasadosAdmin .book-cover-wrap .book-cover-label {
+    position: absolute;
+    inset: 0;
+}
+
+/* book-header-inner: flex-start — título/metas no topo, status no pé via margin-top:auto */
+#tab-registro .book-header-inner,
+#secaoAtrasadosAdmin .book-header-inner {
+    height: var(--cover-h-admin);
+    min-height: var(--cover-h-admin);
+    max-height: var(--cover-h-admin);
+    /* Igual ao catálogo público: os metadados seguem o próprio line-height,
+       sem uma faixa extra entre título, volume/edição e autor. */
+    gap: 0;
+    justify-content: flex-start;
+    padding: 0.5rem 0.75rem;
+    flex: 1 1 0;
+    min-width: 0;
+    overflow: hidden;
+}
+
+/* book-status-row: sempre no pé do header-inner */
+#tab-registro .book-status-row,
+#secaoAtrasadosAdmin .book-status-row {
+    width: 100%;
+    align-self: flex-end;
+    margin-top: auto;
+}
+
+#tab-registro .book-title,
+#secaoAtrasadosAdmin .book-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1.15;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 0;
+}
+
+#tab-registro .book-meta-item,
+#secaoAtrasadosAdmin .book-meta-item {
+    font-size: 0.68rem;
+    overflow: hidden;
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
+#tab-registro .book-meta-item.meta-autor,
+#secaoAtrasadosAdmin .book-meta-item.meta-autor {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+#tab-registro .book-meta-item.meta-categoria,
+#secaoAtrasadosAdmin .book-meta-item.meta-categoria {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+#tab-registro .book-tags-inline,
+#secaoAtrasadosAdmin .book-tags-inline {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+#tab-registro .badge,
+#secaoAtrasadosAdmin .badge       { font-size: 0.64rem; padding: 0.1rem 0.3rem; }
+#tab-registro .tag-keyword,
+#secaoAtrasadosAdmin .tag-keyword { font-size: 0.64rem; }
+
+#tab-registro .accordion-indicator,
+#secaoAtrasadosAdmin .accordion-indicator {
+    width: 14px; height: 14px; font-size: 0.5rem; top: 0.4rem; right: 0.4rem;
+}
+
+/* Botões de ação: altura fixa = --actions-h, separados do header */
+#tab-registro .book-actions {
+    height: var(--actions-h);
+    min-height: var(--actions-h);
+    max-height: var(--actions-h);
+    padding: 0;
+    gap: 0;
+    border-radius: 0 0 var(--radius) var(--radius);
+    overflow: hidden;
+}
+
+#tab-registro .book-actions .btn-small {
+    font-size: 0.58rem;
+    padding: 0.2rem 0.2rem;
+    height: 100%;
+    border-radius: 0;
+}
+
+#tab-registro .book-details > *,
+#secaoAtrasadosAdmin .book-details > * { padding: 0.75rem 0.6rem; }
+
+#tab-registro .book-status-row.stacked,
+#secaoAtrasadosAdmin .book-status-row.stacked {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.1rem;
+    margin-top: auto;
+    width: 100%;
+    align-self: stretch;
+}
+
+#tab-registro .book-status-badge-row,
+#secaoAtrasadosAdmin .book-status-badge-row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    width: 100%;
+}
+
+/* Index: badge à esquerda */
+#listaLivros .book-status-badge-row {
+    justify-content: flex-start;
+}
+
+/* Altura mínima da lista = card maior possível (font 16px: sem botões de ação) */
+#listaLivros {
+    min-height: var(--cover-h);
+}
+
+/* Container fixo das setas — separado dos cards */
+#acervo-nav-wrapper,
+#acervo-nav-wrapper-admin {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin-top: 0.4rem;
+    min-height: 0;
+}
+#acervo-nav-wrapper:empty,
+#acervo-nav-wrapper-admin:empty {
+    display: none;
+}
+#carrossel-outer,
+#carrossel-outer-admin {
+    margin: 0;
+    padding: 0;
+}
+
+/* Garante espaço mínimo para setas não sumirem com poucos cards */
+#listaAdmin {
+    min-height: calc(var(--cover-h) + var(--actions-h));
+}
+
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+/* ── Menu de atalhos (botão 📁) ───────────────────────────────────────────── */
+.menu-atalhos{position:relative;display:inline-flex;margin-right:auto;}
+.menu-atalhos-btn{background:rgba(255,255,255,.2);border:none;color:#fff;height:36px;border-radius:8px;cursor:pointer;font-weight:700;font-size:0.9rem;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;display:flex;align-items:center;gap:0.35rem;padding:0 0.75rem;white-space:nowrap;transition:background .15s;}
+.menu-atalhos-btn:hover,.menu-atalhos-btn:focus-visible{background:rgba(255,255,255,.32);outline:none;}
+.menu-atalhos-btn:active{opacity:.75;}
+.menu-atalhos-chevron{font-size:.65rem;opacity:.8;transition:transform .2s;display:inline-block;}
+.menu-atalhos.aberto .menu-atalhos-chevron{transform:rotate(180deg);}
+.menu-atalhos-lista{position:absolute;top:calc(100% + 6px);left:0;background:var(--card,#fff);border:1px solid var(--border,#e2e8f0);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.13),0 2px 6px rgba(0,0,0,.07);min-width:200px;padding:0.35rem;z-index:2000;display:none;flex-direction:column;gap:2px;animation:menuFadeIn .15s ease;}
+.menu-atalhos.aberto .menu-atalhos-lista{display:flex;}
+@keyframes menuFadeIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+.menu-atalhos-item{display:flex;align-items:center;gap:0.55rem;padding:0.5rem 0.65rem;border-radius:0;border:none;border-bottom:1px solid var(--border,#e2e8f0);background:none;width:100%;text-align:left;cursor:pointer;font-size:0.82rem;font-weight:600;color:var(--text,#1e293b);font-family:inherit;transition:background .12s;white-space:nowrap;}
+.menu-atalhos-item:first-child{border-radius:7px 7px 0 0;}
+.menu-atalhos-item:last-child{border-radius:0 0 7px 7px;border-bottom:none;}
+.menu-atalhos-item:only-child{border-radius:7px;border-bottom:none;}
+.menu-atalhos-item:hover,.menu-atalhos-item:focus-visible{background:var(--bg,#f1f5f9);outline:none;}
+.menu-atalhos-item:active{opacity:.7;}
+.menu-atalhos-item-emoji{font-size:1rem;line-height:1;flex-shrink:0;}
+[data-theme=dark] .menu-atalhos-lista{box-shadow:0 8px 24px rgba(0,0,0,.4),0 2px 6px rgba(0,0,0,.2);}
+
+/* ── Botões laterais do carrossel (borda esquerda do card, altura total) ── */
+/* Setas laterais do carrossel — circulares, esquerda/direita */
+.carrossel-nav-lateral { display: none; } /* container legado não usado */
+.carrossel-btn-lateral {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(37,99,235,0.75);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s;
+    user-select: none;
+}
+.carrossel-btn-lateral[data-dir="prev"] { left: -14px; }
+.carrossel-btn-lateral[data-dir="next"] { right: -14px; }
+.carrossel-btn-lateral:hover,
+.carrossel-btn-lateral:active { background: rgba(37,99,235,0.95); }
+
+/* Botões de ação mesclados com bordas do card */
+#tab-registro .book-actions .btn-small:first-child {
+    border-bottom-left-radius: var(--radius);
+}
+#tab-registro .book-actions .btn-small:last-child {
+    border-bottom-right-radius: var(--radius);
+}
+
+
+/* ──────────────────────────────────────────────────
+   Contador de posição do acervo (ex: 1 / 986)
+   ────────────────────────────────────────────────── */
+#acervo-nav-wrapper > div,
+#acervo-nav-wrapper-admin > div {
+    padding: 0;
+    width: 100%;
+}
+
+/* Contêiner externo largo */
+.carrossel-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 0.4rem 1rem;
+    border-radius: 12px;
+    box-sizing: border-box;
+    min-width: unset !important;
+    pointer-events: auto;
+}
+
+/* Pílula interna com a posição */
+.carrossel-info-inner {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 0;
+    cursor: pointer;
+    background: rgba(37, 99, 235, 0.75);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    font-family: inherit;
+    padding: 0.2rem 1.1rem;
+    border-radius: 8px;
+    letter-spacing: 0.03em;
+}
+.carrossel-info-inner:hover,
+.carrossel-info-inner:active { background: rgba(37, 99, 235, 0.95); }
+.carrossel-info-inner:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+
+
+/* ── Reservas públicas ───────────────────────────────────────── */
+.badge-reserva-grupo { display: inline-grid; grid-template-columns: auto; justify-items: stretch; width: fit-content; max-width: 100%; }
+.badge-reserva-grupo > span { text-align: center; }
+/* Botão: retângulo de cantos arredondados, com a largura ditada apenas pelo badge (width:0 + min-width:100% não influencia o tamanho do grupo). */
+.btn-reservar-livro { margin-top: 0.55rem; width: 0; min-width: 100%; height: 15px; min-height: 15px; max-height: 15px; padding: 0; border-radius: 4px; font-size: 0.68rem; line-height: 1; display: flex; align-items: center; justify-content: center; box-sizing: border-box; white-space: nowrap; overflow: hidden; }
+.btn-reservar-livro:active { transform: none; }
+.btn-reservar-livro:disabled { opacity: 0.58; cursor: not-allowed; }
+.reserva-modal-content h2 { margin: 0 2rem 0.75rem 0; font-size: 1.05rem; }
+/* Miniatura da capa centralizada, na proporção 4:5 do acervo e do cadastro (reserva do index e reservas do admin) */
+.reserva-livro-resumo { display: flex; justify-content: center; margin: 0.3rem 0 0.65rem; }
+.reserva-livro-capa-wrap { --reserva-capa-h: 150px; position: relative; width: calc(var(--reserva-capa-h) * 4 / 5); height: var(--reserva-capa-h); aspect-ratio: 4 / 5; flex-shrink: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 6px; background: #8b9aaa url('logo.png') center 35%/60% no-repeat; border: 1px solid var(--border); }
+[data-theme="dark"] .reserva-livro-capa-wrap { background-color: #3a4a5a; }
+.reserva-livro-capa { display: block; width: 100%; height: 100%; object-fit: cover; }
+.reserva-livro-capa[hidden], .reserva-livro-sem-capa[hidden] { display: none !important; }
+/* Rótulo "SEM CAPA": mesmo visual do cartão da lista (embaixo, branco), sem cobrir o logo */
+.reserva-livro-sem-capa { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 10px; color: #fff; font-size: 9px; font-weight: 800; letter-spacing: 0.05em; line-height: 1.5; text-align: center; text-shadow: 0 1px 4px rgba(0,0,0,0.5); pointer-events: none; }
+/* Modal de reserva: lista de dados do livro (nome, autor, volume, edição, ISBN, classificação, exemplares). */
+.reserva-livro-metadados { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.45rem; margin: 0 0 0.8rem; }
+.reserva-livro-meta-item { min-width: 0; padding: 0.45rem 0.55rem; border: 1px solid var(--border); border-radius: 7px; background: var(--bg); }
+.reserva-livro-meta-item:last-child, .reserva-livro-meta-item--largo { grid-column: 1 / -1; }
+.reserva-livro-meta-item dt { color: var(--text-light); font-size: 0.61rem; font-weight: 800; line-height: 1.3; }
+.reserva-livro-meta-item dd { margin: 0.16rem 0 0; color: var(--text); font-size: 0.72rem; font-weight: 700; line-height: 1.35; overflow-wrap: anywhere; }
+/* Texto de ajuda e formulário de reserva. */
+.reserva-ajuda { color: var(--text-light); font-size: 0.78rem; line-height: 1.45; margin: 0.35rem 0; }
+#reservaPublicaForm { margin-top: 1rem; }
+#reservaPublicaForm > label { display: block; font-weight: 700; font-size: 0.75rem; margin-bottom: 0.35rem; }
+/* Filtros de perfil da busca de pessoas (aluno, funcionário, visitante), com caixas de seleção personalizadas. */
+.reserva-perfil-filtros { display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem 0.75rem; margin: 0 0 0.85rem; padding: 0.65rem 0.75rem; border: 1px solid var(--border); border-radius: 8px; }
+.reserva-perfil-filtros legend { padding: 0 0.25rem; color: var(--text-light); font-size: 0.68rem; font-weight: 800; }
+.reserva-perfil-filtros label { display: flex; align-items: center; gap: 0.4rem; margin: 0; color: var(--text); font-size: 0.72rem; font-weight: 700; cursor: pointer; }
+.reserva-perfil-filtros input[type="checkbox"] { appearance: none; -webkit-appearance: none; flex: 0 0 22px; width: 22px; height: 22px; margin: 0; padding: 0; display: grid; place-content: center; border: 2px solid var(--text-light); border-radius: 6px; background: var(--card); cursor: pointer; }
+.reserva-perfil-filtros input[type="checkbox"]::after { content: '✓'; color: #fff; font-size: 17px; font-weight: 900; line-height: 1; transform: scale(0); transition: transform 0.12s ease-in-out; }
+.reserva-perfil-filtros input[type="checkbox"]:checked { border-color: var(--primary); background: var(--primary); }
+.reserva-perfil-filtros input[type="checkbox"]:checked::after { transform: scale(1); }
+.reserva-perfil-filtros small { grid-column: 1 / -1; color: var(--text-light); font-size: 0.64rem; line-height: 1.35; }
+/* Campo de busca, resultados, pessoa selecionada e mensagem de retorno do formulário de reserva. */
+#reservaPessoaBusca { width: 100%; }
+.reserva-pessoas-resultados { display: grid; gap: 0.35rem; max-height: 210px; overflow-y: auto; margin-top: 0.5rem; }
+.reserva-pessoa-opcao { display: flex; flex-direction: column; align-items: flex-start; gap: 0.18rem; text-align: left; padding: 0.65rem 0.75rem; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); cursor: pointer; }
+.reserva-pessoa-opcao:hover { border-color: var(--primary); }
+.reserva-pessoa-opcao span { color: var(--text-light); font-size: 0.7rem; }
+.reserva-pessoa-selecionada { display: grid; gap: 0.25rem; margin-top: 0.65rem; padding: 0.7rem; border: 1px solid var(--primary); border-radius: 8px; background: var(--bg); font-size: 0.77rem; }
+.reserva-pessoa-selecionada small { color: var(--text-light); font-size: 0.69rem; line-height: 1.4; }
+.reserva-feedback { min-height: 1.2rem; color: var(--primary); font-size: 0.75rem; font-weight: 700; }
+.reserva-modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+/* Modal de regras da reserva. */
+.reserva-regras-content { max-width: 560px; }
+.reserva-regras-livro-label { margin: 0.25rem 0 0.15rem; color: var(--text-light); font-size: 0.65rem; font-weight: 800; }
+.reserva-regras-livro { margin: 0 0 0.85rem; color: var(--primary); font-size: 0.92rem; font-weight: 800; line-height: 1.35; overflow-wrap: anywhere; }
+.reserva-regras-lista { margin: 0 0 1rem; padding-left: 1.25rem; color: var(--text); font-size: 0.78rem; line-height: 1.5; }
+.reserva-regras-lista li { margin: 0 0 0.65rem; padding-left: 0.15rem; }
+.reserva-regras-lista li:last-child { margin-bottom: 0; }
+@media (max-width: 480px) {
+    .reserva-modal-content { padding: 1.15rem; }
+    .reserva-modal-actions { grid-template-columns: 1fr; }
+}
+
+/* ── Fila administrativa de reservas ─────────────────────────── */
+.reservas-filtros { display: grid; grid-template-columns: minmax(0, 2fr) minmax(130px, 1fr); gap: 0.6rem; }
+/* Fila de reservas (admin): lista e cartões de reserva (pessoa, livro e datas). */
+.reservas-lista { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.65rem; min-width: 0; width: 100%; }
+.reserva-admin-card { display: grid; min-width: 0; width: 100%; gap: 0.8rem; margin-bottom: 0; padding: 0.85rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); }
+.reserva-admin-grupo { display: grid; gap: 0.35rem; min-width: 0; }
+.reserva-admin-grupo h3 { margin: 0; color: var(--primary); font-size: 0.7rem; font-weight: 800; letter-spacing: 0.035em; }
+.reserva-admin-campos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.65rem; align-items: start; min-width: 0; padding: 0.75rem 0.9rem; border: 1px solid var(--border); border-radius: 7px; background: var(--bg); }
+.reserva-admin-campos-livro { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.reserva-admin-campo { display: flex; flex-direction: column; gap: 0.12rem; min-width: 0; }
+.reserva-admin-campo span { color: var(--text-light); font-size: 0.62rem; font-weight: 800; line-height: 1.25; overflow-wrap: anywhere; }
+.reserva-admin-campo strong { color: var(--text); font-size: 0.76rem; line-height: 1.35; overflow-wrap: anywhere; }
+.reserva-admin-campo time { font: inherit; }
+/* Botões de ação do cartão de reserva (cancelar / concluir em empréstimo). */
+.reserva-admin-acoes { display: flex; justify-content: flex-end; gap: 0.5rem; }
+.reserva-admin-acoes .btn-small { flex: 0 1 10rem; font-size: 0.64rem; padding: 0.5rem; }
+.reserva-admin-acoes .btn-small:disabled { opacity: 0.55; cursor: not-allowed; }
+/* Paginação da fila de reservas (uma reserva por página). */
+.reservas-paginacao { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.45rem; min-width: 0; width: 100%; max-width: 100%; margin: 0; padding: 0.25rem 0; box-sizing: border-box; }
+.reservas-paginacao .btn-small { flex: 0 1 auto; min-width: 0; width: auto; max-width: 100%; font-size: 0.62rem; padding: 0.3rem 0.5rem; }
+.reservas-paginacao span { min-width: 7rem; color: var(--text-light); font-size: 0.68rem; text-align: center; }
+/* Mensagens de lista vazia e de retorno das ações. */
+.reservas-vazio { padding: 1.5rem 0.5rem; text-align: center; color: var(--text-light); font-size: 0.8rem; }
+.reserva-admin-pessoa { margin: 0.3rem 0 1rem; font-weight: 700; color: var(--text-light); font-size: 0.8rem; }
+.reserva-admin-feedback { min-height: 1.3rem; color: var(--danger); font-weight: 700; font-size: 0.74rem; }
+@media (max-width: 760px) {
+    .reservas-filtros { grid-template-columns: 1fr; }
+    .reserva-admin-campos, .reserva-admin-campos-livro { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .reservas-paginacao { gap: 0.3rem; }
+    .reservas-paginacao span { min-width: 6.5rem; }
+    .reserva-admin-campos-pessoa .reserva-admin-campo:first-child,
+    .reserva-admin-campos-pessoa .reserva-admin-campo-data { grid-column: 1 / -1; }
+    .reserva-admin-acoes { justify-content: stretch; }
+    .reserva-admin-acoes .btn-small { flex: 1; }
+}
+
+/* ── Aviso de livro parecido no cadastro ─────────────────────── */
+.modal-livro-parecido h2 { margin: 0 2rem 0.55rem 0; font-size: 1.05rem; }
+.modal-livro-parecido > p { margin: 0 0 0.8rem; color: var(--text-light); font-size: 0.8rem; line-height: 1.4; }
+.livro-parecido-dados { padding: 0.55rem; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-size: 0.76rem; line-height: 1.35; overflow-wrap: anywhere; }
+.livro-parecido-comparacao { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.65rem; }
+.livro-parecido-painel { min-width: 0; padding: 0.65rem; border: 1px solid var(--border); border-radius: 7px; background: var(--card); }
+.livro-parecido-painel h3 { margin: 0 0 0.55rem; color: var(--primary); font-size: 0.72rem; line-height: 1.25; }
+.livro-parecido-imagens { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.45rem; margin-bottom: 0.65rem; }
+.livro-parecido-midia { min-width: 0; text-align: center; }
+.livro-parecido-midia > strong { display: block; margin-bottom: 0.22rem; color: var(--text-light); font-size: 0.61rem; }
+.livro-parecido-painel > div:not(.livro-parecido-imagens) { margin-bottom: 0.32rem; }
+.livro-parecido-painel > div:last-of-type { margin-bottom: 0; }
+.livro-parecido-painel strong { color: var(--text-light); font-size: 0.65rem; }
+/* Miniaturas do comparativo: mesmo componente do acervo (.book-cover-wrap), proporção 4:5, centralizadas */
+.livro-parecido-midia .book-cover-wrap { --cover-h-parecido: 116px; width: calc(var(--cover-h-parecido) * 4 / 5) !important; min-width: calc(var(--cover-h-parecido) * 4 / 5) !important; max-width: calc(var(--cover-h-parecido) * 4 / 5) !important; height: var(--cover-h-parecido) !important; min-height: var(--cover-h-parecido) !important; max-height: var(--cover-h-parecido) !important; aspect-ratio: 4 / 5; align-self: auto; margin: 0 auto; }
+.livro-parecido-acoes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; margin-top: 1rem; }
+.livro-parecido-acoes button { min-height: 2.45rem; padding: 0.45rem 0.35rem; font-size: 0.72rem; }
+@media (max-width: 600px) { .livro-parecido-comparacao { grid-template-columns: 1fr; } .livro-parecido-acoes { grid-template-columns: 1fr; } }

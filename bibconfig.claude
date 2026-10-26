@@ -1,0 +1,52 @@
+# bibconfig.claude
+**Configuração salva desta biblioteca — gerado automaticamente pelo bibmaker.claude**
+
+⚠️ Este arquivo contém chaves de API privadas. Nunca publique-o no
+GitHub nem o compartilhe. Fica fora da pasta principal do projeto,
+junto com o setup_private.sql, exatamente pelo mesmo motivo.
+
+Para atualizar esta biblioteca no futuro, abra o bibmaker.claude
+numa conversa com o Claude junto com este arquivo — não é
+necessário preencher a entrevista de novo.
+
+---
+
+## Gerado em
+<!-- data da criação ou última atualização -->
+
+## 1. Dados da Biblioteca
+Tipo de Biblioteca: <!-- escolar ou comunitaria -->
+Denominação da Biblioteca: <!-- Ex.: Biblioteca Escolar ou Biblioteca Móvel -->
+Denominação da Escola (sigla): <!-- Ex.: EMTI; somente para biblioteca escolar -->
+Nome da Escola: <!-- nome oficial sem repetir a sigla; exibido após a denominação no rodapé -->
+Nome da Biblioteca: <!-- para comunitária; pode incluir "Biblioteca Comunitária" (o rodapé evita duplicar o prefixo) -->
+
+## 2. Imagens da Biblioteca
+Logo:
+Favicon:
+OG Image:
+
+## 3. Chaves de API
+URL do Supabase:
+Chave Publishable do Supabase:
+Chave do ImgBB:
+Chave da Mistral AI:
+
+## 4. Dados do Projeto
+Nome do Projeto:
+Autor do Projeto:
+Site do Autor:
+Ano de Lançamento:
+Versão do Projeto:
+Descrição para compartilhamento/Open Graph:
+
+### Licença
+Tipo de Licença:
+Nome da Licença:
+Versão da Licença:
+Descrição da Licença:
+URL da Licença:
+
+## 5. GitHub
+URL do Repositório:
+URL da Página GitHub Pages:
