@@ -18,7 +18,7 @@
 -- TABELAS CRIADAS
 --   livros          — Acervo bibliográfico (título, autor, ISBN, categoria,
 --                     quantidade_total, quantidade_disponivel, imagem_url,
---                     pdf_url, verso_url, alt_text, data_cadastro,
+--                     verso_url, alt_text, data_cadastro,
 --                     data_edicao)
 --   emprestimos     — Registro de empréstimos e devoluções (livro_id,
 --                     pessoa_id, nome_aluno, sexo, ano_aluno, turma_aluno,
@@ -79,7 +79,6 @@ CREATE TABLE IF NOT EXISTS livros (
     id BIGINT PRIMARY KEY,
     isbn TEXT,
     imagem_url TEXT,
-    pdf_url TEXT,
     verso_url TEXT,
     titulo TEXT NOT NULL,
     autor TEXT,
@@ -273,7 +272,9 @@ FOR EACH ROW EXECUTE FUNCTION recalcular_disponivel();
 -- Os ALTER TABLE abaixo são mantidos apenas para instalações existentes que
 -- ainda não possuem essas colunas. Em bancos novos, IF NOT EXISTS os ignora.
 ALTER TABLE livros ADD COLUMN IF NOT EXISTS imagem_url TEXT;
-ALTER TABLE livros ADD COLUMN IF NOT EXISTS pdf_url TEXT;
+-- A coluna pdf_url foi removida do projeto (não era mais usada). Em bancos antigos que ainda a têm,
+-- a linha abaixo apaga a coluna; em bancos novos, IF EXISTS faz com que nada aconteça.
+ALTER TABLE livros DROP COLUMN IF EXISTS pdf_url;
 ALTER TABLE livros ADD COLUMN IF NOT EXISTS verso_url TEXT;
 ALTER TABLE livros ADD COLUMN IF NOT EXISTS alt_text TEXT;
 ALTER TABLE livros ADD COLUMN IF NOT EXISTS data_edicao TIMESTAMP WITH TIME ZONE;

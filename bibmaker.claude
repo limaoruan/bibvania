@@ -17,10 +17,17 @@
 
 1. Baixe os arquivos originais da BibVânia Online (repositório completo)
 2. Abra uma conversa nova com o Claude e **anexe o arquivo `bibmaker.claude`**
-3. Digite o comando **`BibMaker`** (não diferencia maiúsculas de
-   minúsculas — `bibmaker`, `BIBMAKER`, `BibMaker` funcionam igual)
+3. Digite um dos comandos abaixo (não diferenciam maiúsculas de
+   minúsculas — `bibmaker create`, `BIBMAKER CREATE`, `BibMaker Create`
+   funcionam igual):
 
-Assim que o Claude ler o arquivo e receber o comando, a entrevista
+| Comando | O que faz |
+|---|---|
+| **`BibMaker create`** | Vai direto para a criação de uma biblioteca **nova**: entrevista completa, desde a primeira seção |
+| **`BibMaker update`** | Vai direto para a **atualização** de uma biblioteca derivada: exige o `bibconfig.claude` preenchido anexado e mostra os valores atuais para você manter ou trocar |
+| **`BibMaker`** | Escolhe sozinho: com um `bibconfig.claude` preenchido anexado, atualiza; sem ele (ou em branco), cria |
+
+Assim que o Claude ler o arquivo e receber o comando, o fluxo
 começa automaticamente, seção por seção. Não é necessário digitar
 mais nada além do comando — o restante da conversa é guiado por mim.
 
@@ -33,7 +40,10 @@ roda direto numa conversa com o Claude, sem navegador ou formulário.
 Vou te fazer perguntas, seção por seção, pra montar sua biblioteca
 personalizada a partir dos arquivos-base da BibVânia Online.
 
-**Já tem uma biblioteca criada e só quer atualizar?** Se você também
+**Já tem uma biblioteca criada e só quer atualizar?** Digite
+**`BibMaker update`** e envie junto o `bibconfig.claude` da sua biblioteca
+(para criar uma biblioteca nova, o comando é **`BibMaker create`**). Se você
+digitar só `BibMaker` e também
 enviou um arquivo `bibconfig.claude` **preenchido** nesta conversa
 (mesmo que só parcialmente — um campo já basta), não preciso repetir
 a entrevista inteira: em cada seção, mostro o valor já preenchido de
@@ -230,6 +240,28 @@ Regras:
   a linha de atribuição nunca recebe os dados da biblioteca, e a linha da
   biblioteca nunca recebe os dados do autor da BibVânia.
 
+### Nome do Projeto: título do cabeçalho, PDF e relatórios
+
+O Nome do Projeto aparece em lugares que não são metadados de busca: o título
+abaixo da logo (nas duas páginas), o cabeçalho e o rodapé do PDF do acervo e o
+cabeçalho dos relatórios do painel. Todos leem a meta `nomeprojeto`, por isso ela
+é **obrigatória** e o BibMaker deve preenchê-la na geração e em toda atualização.
+
+- `index.html` e `admin.html` devem ter `<meta name="nomeprojeto" content="<Nome do Projeto>">`,
+  com o mesmo valor nos dois (a base traz "BibVânia Online"). Vazia, as páginas
+  voltam a mostrar "BibVânia Online".
+- Os três `<h1 data-nome-projeto>` (um no `index.html` e dois no `admin.html`: tela
+  de login e painel) devem trazer como texto inicial o Nome do Projeto em
+  MAIÚSCULAS, que é a reserva sem JavaScript. O `<script>` logo depois do `<h1>`
+  preenche o título e o texto alternativo da logo a partir da meta. Ao editar,
+  preservar o atributo `data-nome-projeto` e esse script.
+- Em uma biblioteca derivada, "BIBVÂNIA ONLINE" no `<h1>` ou "BibVânia Online" na
+  meta `nomeprojeto` é erro. As referências à base de "Nome da biblioteca ×
+  referências à BibVânia Online base" não mudam.
+- Os arquivos-base novos trazem de volta o nome da BibVânia Online na meta e no
+  `<h1>`. Por isso, em atualização, refazer essa troca sempre, mesmo que nenhum
+  campo da entrevista tenha mudado.
+
 ### Autoria: biblioteca derivada × projeto base
 
 Toda biblioteca derivada tem **dois autores distintos, e um nunca substitui o
@@ -290,7 +322,9 @@ BibVânia Online, que é a base.
 
 **Identidade da biblioteca — trocar pelo Nome do Projeto:** o título principal
 (H1) e a linha de apresentação do `README.md`, o título do `LICENCE.md`, o título
-do `CHANGELOG.md`, os rodapés e os metadados das páginas (`title`, Open Graph,
+do `CHANGELOG.md`, a meta `nomeprojeto` e o título do cabeçalho (`<h1 data-nome-projeto>`)
+do `index.html` e do `admin.html` (ver "Nome do Projeto: título do cabeçalho, PDF e
+relatórios"), os rodapés e os metadados das páginas (`title`, Open Graph,
 manifest, JSON-LD, já cobertos no contrato acima) e os links do acervo público e
 do repositório da própria biblioteca.
 
@@ -342,7 +376,8 @@ BibVânia Online base", que continuam "BibVânia Online"). Regravar todos os cam
 biblioteca: o autor da base nunca prevalece sobre o da biblioteca. Preservar personalizações válidas
 existentes que não contradigam os dados confirmados; confirmar qualquer dado
 ambíguo em vez de inventá-lo. Validar ao final: um único `title`, um único
-canonical, JSON-LD parseável, URLs absolutas nos campos sociais/canonical/sitemap,
+canonical, a meta `nomeprojeto` e o texto de cada `<h1 data-nome-projeto>` iguais ao
+Nome do Projeto nos dois HTMLs (nunca "BibVânia Online" em biblioteca derivada), JSON-LD parseável, URLs absolutas nos campos sociais/canonical/sitemap,
 `admin.html` fora do sitemap, CSP do `admin.html` com `https://*.ibb.co` no
 `connect-src` e `https://cdn.jsdelivr.net` no `script-src`, nenhum
 `setup_private.sql`/`bibconfig.claude` dentro da pasta pública, e o workflow `.github/workflows/manter-supabase-ativo.yml`
@@ -357,8 +392,28 @@ Ao processar este arquivo, devo:
    `BIBMAKER`, etc. são equivalentes) antes de iniciar a entrevista —
    não começar automaticamente só porque o arquivo foi anexado. Se a
    pessoa pedir para criar/atualizar uma biblioteca de forma clara e
-   inequívoca em vez de digitar o comando, também posso iniciar
-0.5. Se um `bibconfig.claude` foi enviado junto, verificar se está
+   inequívoca em vez de digitar o comando, também posso iniciar (um pedido
+   claro de criar vale como `BibMaker create`; um de atualizar, como
+   `BibMaker update`)
+0.1. Comandos aceitos (sem diferenciar maiúsculas de minúsculas e ignorando
+   espaços extras). Qualquer outra palavra depois de `BibMaker` é ignorada e
+   o comando vale como `BibMaker` simples:
+   - `BibMaker create` — vou direto para a **criação de uma biblioteca nova**:
+     entrevista completa, seção por seção, a partir da seção 1, sem esperar
+     mais nada. As regras 0.5 a 0.10 (fluxo de atualização) não se aplicam.
+     Se vier junto um `bibconfig.claude` preenchido, não uso os valores dele e
+     não o trato como atualização: aviso em uma frase que ele foi ignorado e
+     que, para atualizar, o comando é `BibMaker update`. Um `bibconfig.claude`
+     em branco é só o modelo e segue normalmente
+   - `BibMaker update` — vou direto para a **atualização de uma biblioteca
+     derivada**, sem a decisão da regra 0.5. Exige um `bibconfig.claude`
+     preenchido (ao menos um campo). Se não foi enviado, ou está em branco,
+     não começo uma entrevista do zero: peço o arquivo (o gerado na criação ou
+     na última atualização da biblioteca) e, se a pessoa não o tiver, explico
+     que sem ele não há como atualizar e ofereço `BibMaker create`. Com ele,
+     sigo as regras 0.6 a 0.10 e o restante do fluxo de atualização
+   - `BibMaker` (sozinho) — comportamento de sempre: decido pela regra 0.5
+0.5. Com o comando `BibMaker` sozinho (regra 0.1), se um `bibconfig.claude` foi enviado junto, verificar se está
    preenchido ou em branco (o modelo de referência da pasta principal
    da BibVânia Online). Critério objetivo: checar **todos** os campos do
    arquivo (não só um subconjunto fixo). Se todos estiverem vazios
@@ -688,7 +743,8 @@ histórico do BibMaker ou do Claude entre conversas diferentes.
 Ele serve para as futuras atualizações, tanto da BibVânia Online base
 (uma nova versão dos arquivos-base) quanto da sua própria biblioteca
 derivada (nome, imagens, chaves, licença etc.), sempre sem refazer a
-entrevista.
+entrevista. Para isso, anexe o `bibmaker.claude` e este arquivo e digite
+`BibMaker update`.
 
 - **Se você perder o `bibconfig.claude`**, a única forma de atualizar
   a biblioteca no futuro é refazendo a entrevista completa do zero,
@@ -798,8 +854,8 @@ GitHub nem o compartilhe. Fica fora da pasta principal do projeto,
 junto com o setup_private.sql, exatamente pelo mesmo motivo.
 
 Para atualizar esta biblioteca no futuro, abra o bibmaker.claude
-numa conversa com o Claude junto com este arquivo — não é
-necessário preencher a entrevista de novo.
+numa conversa com o Claude, anexe este arquivo e digite o comando
+BibMaker update — não é necessário preencher a entrevista de novo.
 
 ---
 

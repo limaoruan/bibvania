@@ -6,8 +6,8 @@ GitHub nem o compartilhe. Fica fora da pasta principal do projeto,
 junto com o setup_private.sql, exatamente pelo mesmo motivo.
 
 Para atualizar esta biblioteca no futuro, abra o bibmaker.claude
-numa conversa com o Claude junto com este arquivo — não é
-necessário preencher a entrevista de novo.
+numa conversa com o Claude, anexe este arquivo e digite o comando
+BibMaker update — não é necessário preencher a entrevista de novo.
 
 ---
 

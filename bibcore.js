@@ -431,7 +431,7 @@ const toUpper = (val) => (val && typeof val === 'string') ? val.toUpperCase().tr
 // Campos que NÃO podem ser convertidos para maiúsculas: URLs (imagem, verso, PDF,
 // foto) e texto alternativo diferenciam maiúsculas de minúsculas ou precisam
 // manter a escrita original para funcionar/ser lidos corretamente.
-const _CAMPOS_CASE_SENSITIVE = new Set(['imagem_url', 'verso_url', 'pdf_url', 'alt_text', 'foto_url']);
+const _CAMPOS_CASE_SENSITIVE = new Set(['imagem_url', 'verso_url', 'alt_text', 'foto_url']);
 
 // Devolve uma CÓPIA do objeto com todos os campos de texto em maiúsculas,
 // exceto os listados em _CAMPOS_CASE_SENSITIVE. Usada antes de gravar livros e
@@ -586,7 +586,7 @@ const DB = {
         try {
             const query = supabase
                 .from("livros")
-                .select("id, titulo, autor, isbn, categoria, volume, edicao, quantidade_total, quantidade_disponivel, alt_text, imagem_url, verso_url, pdf_url, data_cadastro, data_edicao")
+                .select("id, titulo, autor, isbn, categoria, volume, edicao, quantidade_total, quantidade_disponivel, alt_text, imagem_url, verso_url, data_cadastro, data_edicao")
                 .order("data_edicao", { ascending: false, nullsFirst: false })
                 .order("data_cadastro", { ascending: false });
             return await this._fetchAll(query);
@@ -667,7 +667,7 @@ const DB = {
      * Atualiza os metadados de um livro existente.
      * O banco recalcula quantidade_disponivel com base nos empréstimos ativos
      * e nas reservas pendentes; não se deve sobrescrever esse valor no cliente.
-     * imagem_url e pdf_url só são enviados no payload se explicitamente presentes no objeto.
+     * imagem_url e verso_url só são enviados no payload se explicitamente presentes no objeto.
      * @param {Object} livro — objeto livro com id obrigatório
      * @returns {Object} registro atualizado retornado pelo Supabase
      */
@@ -694,14 +694,13 @@ const DB = {
             if (totalNovo !== Number(livroAtual.quantidade_total) && totalNovo < ocupados) {
                 throw new Error(`A quantidade total não pode ficar abaixo dos ${ocupados} exemplares emprestados ou reservados.`);
             }
-            // Separa campos que não devem ir no UPDATE comum: imagens/PDF têm fluxo
+            // Separa campos que não devem ir no UPDATE comum: capa e verso têm fluxo
             // próprio e `quantidade_disponivel` é calculada pelo banco (o cliente
             // nunca decide o estoque disponível).
-            const { imagem_url, verso_url, pdf_url, quantidade_disponivel: _estoqueCalculadoNoCliente, ...livroSemImagem } = livro;
+            const { imagem_url, verso_url, quantidade_disponivel: _estoqueCalculadoNoCliente, ...livroSemImagem } = livro;
             const updatePayload = { ...livroSemImagem, data_edicao: new Date().toISOString() };
             if (imagem_url !== undefined) updatePayload.imagem_url = imagem_url;
             if (verso_url  !== undefined) updatePayload.verso_url  = verso_url;
-            if (pdf_url    !== undefined) updatePayload.pdf_url    = pdf_url;
 
             const { data, error } = await supabase
                 .from("livros").update(updatePayload).eq("id", livro.id).select().single();
@@ -1031,7 +1030,7 @@ const DB = {
         const [livrosResult, pessoasResult] = await Promise.all([
             livroIds.length
                 ? supabase.from('livros')
-                    .select('id,isbn,imagem_url,pdf_url,verso_url,titulo,autor,categoria,volume,edicao,alt_text,quantidade_total,quantidade_disponivel,data_cadastro,data_edicao')
+                    .select('id,isbn,imagem_url,verso_url,titulo,autor,categoria,volume,edicao,alt_text,quantidade_total,quantidade_disponivel,data_cadastro,data_edicao')
                     .in('id', livroIds)
                 : Promise.resolve({ data: [], error: null }),
             pessoaIds.length

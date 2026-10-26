@@ -391,7 +391,7 @@ html.admin-login-locked, body.admin-login-locked { overflow: hidden !important; 
         <div id="adminLoginContent" aria-hidden="true">
             <div id="adminLoginBox">
             <img src="logo.png" alt="Logo BibVânia Online">
-            <h1>BIBVÂNIA ONLINE</h1>
+            <h1 data-nome-projeto>BIBVÂNIA ONLINE</h1>
             <div class="school-name" id="nomeEscolaLogin" aria-hidden="true"><span></span><span></span></div>
             <script>
                 // Preenche o nome da escola da tela de login (em duas linhas) a partir das <meta name="nomeesc1"> e
@@ -611,7 +611,23 @@ html.admin-login-locked, body.admin-login-locked { overflow: hidden !important; 
 
 <header role="banner" aria-label="Cabeçalho">
         <img src="logo.png" alt="Logo BibVânia Online — Sistema de Biblioteca Escolar" class="header-logo" fetchpriority="high" onerror="(function(img){var t=0;var fn=function(){if(t<3){t++;img.src=img.src.split('?')[0]+'?r='+t;img.onerror=fn}else{img.onerror=null;img.style.display='none'}};img.onerror=fn;fn()})(this)">
-        <h1>BIBVÂNIA ONLINE</h1>
+        <h1 data-nome-projeto>BIBVÂNIA ONLINE</h1>
+        <script>
+            // Título do cabeçalho (abaixo da logo): usa o Nome do Projeto da meta "nomeprojeto" (preenchida pelo BibMaker
+            // com o nome da biblioteca). O texto escrito no <h1> é a reserva para quando a meta estiver vazia ou o
+            // JavaScript estiver desligado. Também ajusta o texto alternativo da logo que vem logo antes do título.
+            (function(){
+                var m = document.querySelector('meta[name="nomeprojeto"]');
+                var nome = ((m && m.getAttribute('content')) || '').trim();
+                if (!nome) return;
+                var titulos = document.querySelectorAll('h1[data-nome-projeto]');
+                for (var i = 0; i < titulos.length; i++) {
+                    titulos[i].textContent = nome.toUpperCase();
+                    var logo = titulos[i].previousElementSibling;
+                    if (logo && logo.tagName === 'IMG') logo.alt = 'Logo ' + nome;
+                }
+            })();
+        </script>
         <div class="school-name" id="nomeEscolaAdmin" aria-label="Biblioteca Escolar da EMTI Professora Maria Vânia Farias Linhares"><span></span><span></span></div>
         <script>
             // Preenche o nome da escola do cabeçalho do painel (#nomeEscolaAdmin) em duas linhas, a partir das metas
