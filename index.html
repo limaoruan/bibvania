@@ -95,7 +95,8 @@
     <meta name="license-version" content="4.0">
     <meta name="license-url" content="https://creativecommons.org/licenses/by-sa/4.0/deed.pt-br">
     <meta name="source" content="https://github.com/limaoruan/bibvania">
-    <meta name="version" content="">
+    <meta name="version" content="3.1">
+    <meta name="revised" content="2026-11-23T15:59:22-03:00">
     <meta name="year" content="2026">
     <meta name="tipobib" content="escolar">
     <meta name="tipolabel" content="Biblioteca Escolar">
@@ -103,6 +104,53 @@
     <meta name="nomeescola" content="Professora Maria Vânia Farias Linhares">
     <meta name="nomebiblioteca" content="">
     <meta name="nomeprojeto" content="BibVânia Online">
+    <meta name="nomeesc1" content="BIBLIOTECA ESCOLAR DA EMTI">
+    <meta name="nomeesc2" content="PROFESSORA MARIA VÂNIA FARIAS LINHARES">
+    <script>
+        // Identidade da biblioteca nas páginas: a ÚNICA fonte são as metas de identidade (as mesmas que o rodapé já usa):
+        // tipobib, tipolabel, denominacaoescola, nomeescola e nomebiblioteca, mais nomeprojeto.
+        //  - Monta as duas linhas do nome (ex.: "BIBLIOTECA ESCOLAR DA EMTI" / "PROFESSORA MARIA VÂNIA FARIAS LINHARES",
+        //    ou, na comunitária, o nome da biblioteca) e as grava nas metas nomeesc1 e nomeesc2, que o cabeçalho, o login,
+        //    os relatórios e o PDF já leem; depois preenche o bloco de nome da escola e o aria-label.
+        //  - Preenche o nome do projeto no rodapé (elementos com data-nome-projeto-rodape) e nos textos alternativos das logos.
+        // Sem metas de identidade preenchidas, nada muda: vale o que estiver escrito nas metas nomeesc1/nomeesc2 e no HTML.
+        (function(){
+            function meta(n){ var e=document.querySelector('meta[name="'+n+'"]'); return e?(e.getAttribute('content')||'').trim():''; }
+            function gravar(n,v){
+                var e=document.querySelector('meta[name="'+n+'"]');
+                if(!e){ e=document.createElement('meta'); e.setAttribute('name',n); document.head.appendChild(e); }
+                e.setAttribute('content',v);
+            }
+            var tipo=meta('tipobib').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+            var rotulo=meta('tipolabel'), sigla=meta('denominacaoescola'), escola=meta('nomeescola'), biblioteca=meta('nomebiblioteca');
+            var l1='', l2='';
+            if(tipo==='escolar'){
+                l1=(rotulo||'Biblioteca Escolar')+(sigla?' da '+sigla:'');
+                l2=escola;
+            } else if(tipo==='comunitaria'){
+                l1=biblioteca||rotulo;
+            }
+            var projeto=meta('nomeprojeto');
+            if(l1||l2){ gravar('nomeesc1',l1.toUpperCase()); gravar('nomeesc2',l2.toUpperCase()); }
+            document.addEventListener('DOMContentLoaded',function(){
+                if(l1||l2){
+                    ['nomeEscolaExibicao','nomeEscolaAdmin'].forEach(function(id){
+                        var el=document.getElementById(id); if(!el) return;
+                        var sp=el.querySelectorAll('span');
+                        if(sp.length>=2){ sp[0].textContent=l1.toUpperCase(); sp[1].textContent=l2.toUpperCase(); }
+                        el.setAttribute('aria-label',(l1+' '+l2).trim());
+                    });
+                }
+                if(projeto){
+                    var rodape=document.querySelectorAll('[data-nome-projeto-rodape]');
+                    for(var i=0;i<rodape.length;i++) rodape[i].textContent=projeto;
+                // Textos alternativos das logos (transição, saída, relatório) que ainda citam o nome da base.
+                var logos=document.querySelectorAll('img[alt*="BibVânia Online"]');
+                for(var j=0;j<logos.length;j++) logos[j].alt=logos[j].alt.split('BibVânia Online').join(projeto);
+                }
+            });
+        })();
+    </script>
     <meta name="versaobase" content="">
     <link rel="icon" href="favicon.ico" sizes="any">
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
@@ -120,16 +168,17 @@
     <!-- Preconnect: reduz latência de conexão com serviços externos -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    <!-- As capas são hospedadas no ImgBB; antecipa DNS/TLS sem alterar a imagem exibida. -->
+    <link rel="preconnect" href="https://i.ibb.co" crossorigin>
+    <link rel="dns-prefetch" href="https://i.ibb.co">
     <!-- Preconnect Supabase: elimina latência de TLS handshake antes do JS rodar -->
-    <link rel="preconnect" href="https://hktovlpkjlxnbigifgrj.supabase.co" crossorigin>
-    <link rel="preconnect" href="https://hktovlpkjlxnbigifgrj.supabase.co">
     <meta name="description" content="Pesquise e explore o acervo digital da biblioteca escolar. Veja livros disponíveis, autores e categorias.">
     <meta name="robots" content="index, follow">
     <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1">
     <meta name="bingbot" content="index, follow">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta name="google" content="notranslate">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: blob: https:; font-src 'self' data: https://cdn.jsdelivr.net; connect-src 'self' https://*.supabase.co https://api.imgbb.com https://api.mistral.ai https://limaoruan.github.io https://raw.githubusercontent.com; manifest-src 'self';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: blob: https:; font-src 'self' data: https://cdn.jsdelivr.net; connect-src 'self' https://*.supabase.co https://limaoruan.github.io https://raw.githubusercontent.com; manifest-src 'self';">
     <!-- Anti-clickjacking: o frame-ancestors não funciona em <meta>. Se a página estiver dentro de um iframe, ela fica oculta e tenta sair dele. -->
     <style id="bv-antiframe">html{display:none!important}</style>
     <script>(function(){if(window.top===window.self){var s=document.getElementById('bv-antiframe');if(s)s.remove();}else{try{window.top.location=window.self.location.href;}catch(e){}}})();</script>
@@ -199,7 +248,7 @@
                 <img id="menuAtalhosFavicon" src="favicon.png" alt="" aria-hidden="true" style="width:20px;height:20px;border-radius:4px;object-fit:contain;flex-shrink:0;"> <span class="menu-atalhos-chevron" aria-hidden="true">▼</span>
             </button>
             <div class="menu-atalhos-lista" role="menu">
-                <button class="menu-atalhos-item" role="menuitem" onclick="window.open('https://github.com/limaoruan/bibvania','_blank','noopener,noreferrer');fecharMenuAtalhos()">
+                <button class="menu-atalhos-item" role="menuitem" onclick="abrirRepositorio()">
                     <span class="menu-atalhos-item-emoji">📁</span> Repositório
                 </button>
                 <button class="menu-atalhos-item" role="menuitem" onclick="irParaAdmin();fecharMenuAtalhos()">
@@ -222,6 +271,15 @@
                 menu.classList.remove('aberto');
                 var botao = menu.querySelector('.menu-atalhos-btn');
                 if (botao) botao.setAttribute('aria-expanded', 'false');
+            };
+            // Abre o repositório DESTA biblioteca no GitHub. O endereço vem da meta "source" (o BibMaker grava ali a
+            // "URL do Repositório" da biblioteca). Se a meta estiver vazia ou não for http(s), usa o repositório da base.
+            window.abrirRepositorio = function() {
+                var m = document.querySelector('meta[name="source"]');
+                var url = ((m && m.getAttribute('content')) || '').trim();
+                if (!/^https?:\/\//i.test(url)) url = 'https://github.com/limaoruan/bibvania';
+                window.open(url, '_blank', 'noopener,noreferrer');
+                window.fecharMenuAtalhos();
             };
             window.irParaAdmin = function() { window.navegarCom('admin.html'); };
             document.addEventListener('click', function(event) {
@@ -401,12 +459,12 @@
          * Aplica borda vermelha se o livro tiver empréstimo atrasado.
          * Usa _idsComCapaCache para decidir o estado inicial da capa:
          *   - 'sem'  → placeholder "SEM CAPA" imediatamente
-         *   - 'tem'  → img com src em branco; _injetarCapas preencherá via preload
+         *   - 'tem'  → img recebe a URL diretamente; _injetarCapas valida e revela a capa
          *   - null   → "CARREGANDO CAPA" até _injetarCapas resolver
          */
         function renderizarLivro(l, isAtrasado, isFirst) {
             const borderStyle = isAtrasado ? 'style="border-color:var(--danger); border-width: 2px;"' : '';
-            const imgAttrs = isFirst ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"';
+            const imgAttrs = isFirst ? 'loading="eager" fetchpriority="high" decoding="async"' : 'loading="lazy" decoding="async"';
             const titulo = escapeHtml(l.titulo);
             const alt = escapeHtml(l.alt_text || ('Capa do livro: ' + (l.titulo || '')));
             const imagem = /^https?:\/\//i.test(String(l.imagem_url || '')) ? escapeHtml(l.imagem_url) : '';
@@ -616,10 +674,14 @@
          * apenas reinjeta as capas pendentes sem reescrever o DOM.
          */
         async function renderAcervo() {
-            const termo = normalizar(document.getElementById('buscaLivros').value);
+            const filtroBusca = window.DB.extrairFiltroClassificacao(document.getElementById('buscaLivros').value);
+            const termo = normalizar(filtroBusca.termo);
             const catFiltro = document.getElementById('filtroCategoriaPublico')?.value || '';
 
             let filtrados = catFiltro ? todosLivros.filter(l => normalizarCategoriaAcervo(l.categoria) === catFiltro) : todosLivros;
+            if (filtroBusca.categorias.length) {
+                filtrados = filtrados.filter(l => filtroBusca.categorias.includes(normalizarCategoriaAcervo(l.categoria)));
+            }
             if (termo) {
                 filtrados = filtrados.filter(l =>
                     normalizar(l.titulo).includes(termo) ||
@@ -628,7 +690,7 @@
                 );
             }
 
-            if (_livrosOrdenados.length === filtrados.length && !termo && !catFiltro) {
+            if (_livrosOrdenados.length === filtrados.length && !termo && !catFiltro && !filtroBusca.categorias.length) {
                 filtrados = _livrosOrdenados;
             } else {
                 filtrados = [...filtrados].sort((a, b) => _collator.compare(a.titulo, b.titulo));
@@ -691,6 +753,8 @@
                 if (!livro || !livro.imagem_url || livro._capaResolvida === 'sem') return;
                 if (livro._capaResolvida === 'tem') return;
                 const img = new Image();
+                // O vizinho é antecipado, mas nunca deve competir com a capa visível.
+                img.fetchPriority = 'low';
                 img.onload = () => {
                     if (img.naturalWidth > 0 && img.naturalWidth === img.naturalHeight && img.naturalWidth <= 300) {
                         livro._capaResolvida = 'sem'; livro.imagem_url = null;
@@ -727,7 +791,10 @@
                 if (!wrap) return;
                 const img = wrap.querySelector('img.cover-img');
                 if (!img) return;
-                if (card) card.style.opacity = '0'; // Só esconde quando vai realmente esperar o onload
+                // Não esconda o card enquanto a capa baixa: o <img> já está no DOM com
+                // prioridade alta e deve aparecer assim que o navegador receber os pixels.
+                // O tratamento de erro abaixo ainda troca URLs inválidas por SEM CAPA.
+                if (card) card.style.opacity = '1';
 
                 // Chamada quando a capa termina de carregar. Se a imagem for um quadrado pequeno
                 // (<= 300px, largura = altura), é tratada como PLACEHOLDER e o livro é marcado como
@@ -833,17 +900,25 @@
                 (function _preCarregarCapas() {
                     if (!_preCarregarCapas._cache) _preCarregarCapas._cache = new Set();
                     const cache = _preCarregarCapas._cache;
-                    const urls = todosLivros.filter(l => l.imagem_url).map(l => l.imagem_url);
+                    // No catálogo público a lista é ordenada alfabeticamente, enquanto o retorno do
+                    // banco pode estar em outra ordem. A primeira URL do retorno, portanto, pode não
+                    // ser a capa que está na tela e acabava ocupando a vaga prioritária da conexão.
+                    const capaVisivel = _filtradosAtual[_paginaAtual]?.imagem_url || '';
+                    const urls = [...(capaVisivel ? [capaVisivel] : []),
+                        ...todosLivros.filter(l => l.imagem_url).map(l => l.imagem_url)]
+                        .filter((url, i, lista) => url && lista.indexOf(url) === i);
                     const firstUrl = urls[0];
                     const rest = urls.slice(1);
-                    // Pré-carrega as demais capas, uma a cada 50 ms, para não disputar banda com a
-                    // primeira (que é carregada antes). O `cache` evita baixar a mesma URL duas vezes.
+                    // Aguarda a capa visível (ou a primeira disponível) e só então pré-carrega as
+                    // demais com prioridade baixa e espaçamento de 50 ms. O `cache` evita downloads
+                    // repetidos, sem mudar a qualidade das capas.
                     function _prefetchRest() {
                         rest.forEach(function(url, i) {
                             if (cache.has(url)) return;
                             cache.add(url);
                             setTimeout(function() {
                                 const img = new Image();
+                                img.fetchPriority = 'low';
                                 img.src = url;
                             }, i * 50);
                         });
@@ -1292,7 +1367,7 @@
                 <li><strong>Funcionários:</strong> podem manter quantas reservas pendentes e empréstimos ativos quiserem, desde que haja exemplares disponíveis.</li>
                 <li>A reserva não é confirmada automaticamente: depois de continuar, selecione o cadastro correto e envie a solicitação para a biblioteca.</li>
             </ul>
-            <div class="reserva-modal-actions">
+            <div class="reserva-modal-execuções">
                 <button type="button" id="reservaRegrasVoltar" class="btn-block btn-outline">VOLTAR</button>
                 <button type="button" id="reservaRegrasContinuar" class="btn-block btn-primary">CONTINUAR PARA A RESERVA</button>
             </div>
@@ -1325,18 +1400,18 @@
                     <small id="reservaPessoaRegra"></small>
                 </div>
                 <p id="reservaPublicaMsg" class="reserva-feedback" role="status" aria-live="polite"></p>
-            <div class="reserva-modal-actions">
+            <div class="reserva-modal-execuções">
                 <button type="button" id="reservaPublicaCancelar" class="btn-block btn-outline">CANCELAR</button>
                 <button type="submit" id="reservaConfirmar" class="btn-block btn-primary" disabled>CONFIRMAR RESERVA</button>
             </div>
             </form>
         </div>
     </div>
-    <footer class="site-footer" aria-label="Informações do site" style="text-align:left;background:var(--card);border-top:1px solid var(--border);color:var(--text-light);font-size:.7rem;line-height:1.35;padding:.5rem 1rem calc(.5rem + env(safe-area-inset-bottom,0px));">
-    <b>BibVânia Online</b><br><span class="site-footer-description">Sistema de gerenciamento de biblioteca para pesquisa do acervo, empréstimos e reservas da EMTI Professora Maria Vânia Farias Linhares</span><br>
-    Versão: 3.0 · Lançamento 2026 · © 2026 Ruan Oliveira Lima ·
-    <span style="white-space:nowrap"><a href="https://www.instagram.com/ruanoliveiralima_/" target="_blank" rel="me author noopener" class="license-link" style="color:var(--primary);font-weight:700;text-decoration:underline;text-underline-offset:2px;">Instagram do autor</a></span> ·
-    <span style="white-space:nowrap">Licença: <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.pt-br" target="_blank" rel="license noopener" class="license-link" style="color:var(--primary);font-weight:700;text-decoration:underline;text-underline-offset:2px;">CC BY-SA 4.0</a></span>
+    <footer class="site-footer" aria-label="Informações do site" style="background:var(--card);border-top:1px solid var(--border);color:var(--text-light);font-size:.7rem;line-height:1.35;padding:.5rem 1rem calc(.5rem + env(safe-area-inset-bottom,0px));">
+    <b data-nome-projeto-rodape>BibVânia Online</b><br><span class="site-footer-description">Sistema de gerenciamento de biblioteca para pesquisa do acervo, empréstimos e reservas da EMTI Professora Maria Vânia Farias Linhares</span><br>
+    Versão: 3.1 · Lançamento 2026 · © 2026 Ruan Oliveira Lima ·
+    <span style="white-space:nowrap"><a href="https://www.instagram.com/ruanoliveiralima_/" target="_blank" rel="me author noopener" class="license-link">Instagram do autor</a></span> ·
+    <span style="white-space:nowrap">Licença: <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.pt-br" target="_blank" rel="license noopener" class="license-link">CC BY-SA 4.0</a></span>
 </footer>
     <script>
         // Fecha o lightbox da capa (ampliação) e devolve o foco a quem o abriu.
@@ -1636,7 +1711,10 @@
                 _setPct(98, 'PREPARANDO DOWNLOAD...');
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
-                a.href = url; a.download = 'acervo-bibvania-' + agora.replace(/[/:, ]/g,'-') + '.pdf';
+                // Nome do arquivo: "acervo-" + nome do projeto (da meta nomeprojeto, sem acentos) + data e hora.
+                const _slugProjeto = (document.querySelector('meta[name="nomeprojeto"]')?.getAttribute('content') || 'BibVânia Online')
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+                a.href = url; a.download = 'acervo-' + _slugProjeto + '-' + agora.replace(/[/:, ]/g,'-') + '.pdf';
                 document.body.appendChild(a); a.click();
                 setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); _setPct(100, 'CONCLUÍDO!'); setTimeout(_fecharOverlay, 600); }, 300);
             }, function(err) {

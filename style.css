@@ -51,7 +51,7 @@
  *   .no-theme-transition suprime transitions durante a troca.
  *
  * @author  Ruan Oliveira Lima <https://www.instagram.com/ruanoliveiralima_/>
- * @version 1.4
+ * @version 1.5
  * @year    2026
  * @license CC-BY-SA-4.0
  * @source  https://github.com/limaoruan/bibvania
@@ -72,7 +72,7 @@
     --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
     --font-size: 16px;
     /* Altura recalculada: Index com 3 linhas no título; admin com 4.
-       O admin soma --actions-h para os botões Editar/Excluir. */
+       O admin soma --execuções-h para os botões Editar/Excluir. */
     /* Altura do card público recalculada para acomodar badge + botão Reservar. */
     --cover-h: 12.5rem;
     --cover-h-admin: 12rem;
@@ -680,14 +680,14 @@ input:disabled {
 }
 
 /* ── Barra de ações do card (admin) — FORA do accordion para evitar conflito de clique ── */
-.book-actions {
+.book-execuções {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 0.5rem;
     padding: 0.75rem 1.25rem 1rem;
 }
 
-.book-actions /* Tamanho mínimo de área de toque para botões pequenos — atende WCAG 2.5.5 (44×44px). */
+.book-execuções /* Tamanho mínimo de área de toque para botões pequenos — atende WCAG 2.5.5 (44×44px). */
 .btn-small {
     width: 100%;
     text-align: center;
@@ -812,6 +812,34 @@ footer {
     font-weight: 600;
     background: var(--card);
     border-top: 3px solid var(--green);
+}
+
+/* Links do rodapé: sem destaque permanente; destacam somente em interação. */
+.site-footer {
+    text-align: justify !important;
+}
+.site-footer a,
+.site-footer a.license-link {
+    color: inherit !important;
+    font-weight: inherit !important;
+    text-decoration: none !important;
+    text-underline-offset: 2px;
+    transition: color 0.15s ease, text-decoration-color 0.15s ease;
+}
+.site-footer a:hover,
+.site-footer a:focus-visible,
+.site-footer a:active,
+.site-footer a.license-link:hover,
+.site-footer a.license-link:focus-visible,
+.site-footer a.license-link:active {
+    color: var(--primary) !important;
+    font-weight: 700 !important;
+    text-decoration: underline !important;
+    outline: none;
+}
+.site-footer a:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
 }
 
 /* Utilitários */
@@ -1199,7 +1227,7 @@ input[type="search"] { appearance: none; -webkit-appearance: none; }
     color: var(--danger);
     outline: none;
 }
-.loan-actions {
+.loan-execuções {
     display: flex;
     gap: 0.5rem;
     margin-top: 0.5rem;
@@ -1431,7 +1459,7 @@ input[type="search"] { appearance: none; -webkit-appearance: none; }
    ══════════════════════════════════════════════════════════════ */
 
 /* Altura dos botões de ação — usada para estabilizar as setas */
-:root { --actions-h: 2.1rem; }
+:root { --execuções-h: 2.1rem; }
 
 /* book-item: altura mínima padrão — cresce se o conteúdo precisar */
 #tab-registro .book-item,
@@ -1440,9 +1468,9 @@ input[type="search"] { appearance: none; -webkit-appearance: none; }
     padding: 0 !important;
     overflow: visible !important;
     align-items: stretch !important;
-    min-height: calc(var(--cover-h-admin) + var(--actions-h)) !important;
-    height: calc(var(--cover-h-admin) + var(--actions-h)) !important;
-    max-height: calc(var(--cover-h-admin) + var(--actions-h)) !important;
+    min-height: calc(var(--cover-h-admin) + var(--execuções-h)) !important;
+    height: calc(var(--cover-h-admin) + var(--execuções-h)) !important;
+    max-height: calc(var(--cover-h-admin) + var(--execuções-h)) !important;
 }
 
 /* book-header: min-height = cover-h, cresce se precisar, flex para capa esticar */
@@ -1596,18 +1624,18 @@ input[type="search"] { appearance: none; -webkit-appearance: none; }
     width: 14px; height: 14px; font-size: 0.5rem; top: 0.4rem; right: 0.4rem;
 }
 
-/* Botões de ação: altura fixa = --actions-h, separados do header */
-#tab-registro .book-actions {
-    height: var(--actions-h);
-    min-height: var(--actions-h);
-    max-height: var(--actions-h);
+/* Botões de ação: altura fixa = --execuções-h, separados do header */
+#tab-registro .book-execuções {
+    height: var(--execuções-h);
+    min-height: var(--execuções-h);
+    max-height: var(--execuções-h);
     padding: 0;
     gap: 0;
     border-radius: 0 0 var(--radius) var(--radius);
     overflow: hidden;
 }
 
-#tab-registro .book-actions .btn-small {
+#tab-registro .book-execuções .btn-small {
     font-size: 0.58rem;
     padding: 0.2rem 0.2rem;
     height: 100%;
@@ -1668,7 +1696,7 @@ input[type="search"] { appearance: none; -webkit-appearance: none; }
 
 /* Garante espaço mínimo para setas não sumirem com poucos cards */
 #listaAdmin {
-    min-height: calc(var(--cover-h) + var(--actions-h));
+    min-height: calc(var(--cover-h) + var(--execuções-h));
 }
 
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
@@ -1723,10 +1751,10 @@ input[type="search"] { appearance: none; -webkit-appearance: none; }
 .carrossel-btn-lateral:active { background: rgba(37,99,235,0.95); }
 
 /* Botões de ação mesclados com bordas do card */
-#tab-registro .book-actions .btn-small:first-child {
+#tab-registro .book-execuções .btn-small:first-child {
     border-bottom-left-radius: var(--radius);
 }
-#tab-registro .book-actions .btn-small:last-child {
+#tab-registro .book-execuções .btn-small:last-child {
     border-bottom-right-radius: var(--radius);
 }
 
@@ -1819,7 +1847,7 @@ input[type="search"] { appearance: none; -webkit-appearance: none; }
 .reserva-pessoa-selecionada { display: grid; gap: 0.25rem; margin-top: 0.65rem; padding: 0.7rem; border: 1px solid var(--primary); border-radius: 8px; background: var(--bg); font-size: 0.77rem; }
 .reserva-pessoa-selecionada small { color: var(--text-light); font-size: 0.69rem; line-height: 1.4; }
 .reserva-feedback { min-height: 1.2rem; color: var(--primary); font-size: 0.75rem; font-weight: 700; }
-.reserva-modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+.reserva-modal-execuções { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
 /* Modal de regras da reserva. */
 .reserva-regras-content { max-width: 560px; }
 .reserva-regras-livro-label { margin: 0.25rem 0 0.15rem; color: var(--text-light); font-size: 0.65rem; font-weight: 800; }
@@ -1829,7 +1857,7 @@ input[type="search"] { appearance: none; -webkit-appearance: none; }
 .reserva-regras-lista li:last-child { margin-bottom: 0; }
 @media (max-width: 480px) {
     .reserva-modal-content { padding: 1.15rem; }
-    .reserva-modal-actions { grid-template-columns: 1fr; }
+    .reserva-modal-execuções { grid-template-columns: 1fr; }
 }
 
 /* ── Fila administrativa de reservas ─────────────────────────── */

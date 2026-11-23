@@ -5,7 +5,7 @@
 
 | | |
 |---|---|
-| **Versão** | 2.7 <!-- = versão da BibVânia Online instalada − 0.3 --> |
+| **Versão** | 2.8 <!-- = versão da BibVânia Online instalada − 0.3; base atual 3.1 --> |
 | **Descrição** | Gera uma instância personalizada do BibVânia Online a partir dos arquivos-base, pronta para publicar no GitHub Pages |
 | **Repositório** | github.com/limaoruan/bibvania |
 | **Licença** | CC-BY-SA-4.0 |
@@ -15,8 +15,8 @@
 
 ## 🚀 Como ativar
 
-1. Baixe os arquivos originais da BibVânia Online (repositório completo)
-2. Abra uma conversa nova com o Claude e **anexe o arquivo `bibmaker.claude`**
+1. Baixe os arquivos originais completos da BibVânia Online (repositório completo) na versão que será usada.
+2. Abra uma conversa nova com o Claude e **anexe `bibmaker.claude` e a pasta/ZIP completo dos arquivos-base**. O construtor não contém a aplicação e não consegue gerá-la sem os arquivos-base.
 3. Digite um dos comandos abaixo (não diferenciam maiúsculas de
    minúsculas — `bibmaker create`, `BIBMAKER CREATE`, `BibMaker Create`
    funcionam igual):
@@ -24,8 +24,8 @@
 | Comando | O que faz |
 |---|---|
 | **`BibMaker create`** | Vai direto para a criação de uma biblioteca **nova**: entrevista completa, desde a primeira seção |
-| **`BibMaker update`** | Vai direto para a **atualização** de uma biblioteca derivada: exige o `bibconfig.claude` preenchido anexado e mostra os valores atuais para você manter ou trocar |
-| **`BibMaker`** | Escolhe sozinho: com um `bibconfig.claude` preenchido anexado, atualiza; sem ele (ou em branco), cria |
+| **`BibMaker update`** | Vai direto para a **atualização** de uma biblioteca derivada: exige o pacote/pasta atual da biblioteca, o `bibconfig.claude` preenchido e os arquivos-base novos; mostra os valores atuais para você manter ou trocar |
+| **`BibMaker`** | Escolhe pelo conteúdo real do `bibconfig.claude`: se preenchido, entra no fluxo update e exige também pacote/pasta atual da biblioteca e nova base completa; se ausente/em branco, entra no fluxo create e exige a base completa |
 
 Assim que o Claude ler o arquivo e receber o comando, o fluxo
 começa automaticamente, seção por seção. Não é necessário digitar
@@ -41,7 +41,8 @@ Vou te fazer perguntas, seção por seção, pra montar sua biblioteca
 personalizada a partir dos arquivos-base da BibVânia Online.
 
 **Já tem uma biblioteca criada e só quer atualizar?** Digite
-**`BibMaker update`** e envie junto o `bibconfig.claude` da sua biblioteca
+**`BibMaker update`** e envie junto o pacote `.zip` ou a pasta completa da biblioteca atual,
+o `bibconfig.claude` mais recente e os arquivos-base completos da nova versão
 (para criar uma biblioteca nova, o comando é **`BibMaker create`**). Se você
 digitar só `BibMaker` e também
 enviou um arquivo `bibconfig.claude` **preenchido** nesta conversa
@@ -51,28 +52,39 @@ cada campo e pergunto se você quer mantê-lo ou trocá-lo, pergunto
 normalmente qualquer campo que ainda esteja vazio, e no final só
 confirmo com você o que mudou (nova versão da BibVânia Online, chave nova,
 etc.) antes de aplicar. Se o `bibconfig.claude` enviado estiver
-totalmente em branco (o modelo de referência que vem na pasta
-principal da BibVânia Online), eu ignoro ele e sigo com a entrevista
-completa normalmente, como se fosse uma biblioteca nova.
+totalmente em branco — inclusive quando contém apenas rótulos, comentários HTML,
+instruções ou exemplos do modelo embutido neste arquivo — eu ignoro ele e sigo
+com a entrevista completa normalmente, como se fosse uma biblioteca nova. A pasta-base
+não contém um `bibconfig.claude` separado; o modelo está apenas neste construtor.
 
 **O que você precisa ter em mãos antes de começar:**
 - Os arquivos originais da BibVânia Online (baixados do repositório)
-- Chave publishable do Supabase (obrigatória — veja abaixo como obter)
-- Chave do ImgBB (obrigatória — gratuita)
-- Chave da Mistral AI (obrigatória — há plano gratuito, alimenta o
-  botão Vânia de análise de capa com IA)
+- URL do projeto Supabase e chave publishable correspondentes ao mesmo projeto (obrigatórias — veja abaixo como obter)
+- Chave do ImgBB (obrigatória — gratuita; você NÃO a informa a mim: ela vai
+  para os Secrets das Edge Functions do seu Supabase)
+- Chave da API Mistral (obrigatória para o botão Vânia; será cadastrada como Secret `MISTRAL_API_KEY` da Edge Function no Supabase, nunca no frontend)
 - Logo, favicon e imagem de compartilhamento (OG Image) — todas
   obrigatórias, pois o BibMaker não usa imagens padrão; as dimensões
   mínimas estão na entrevista
-- Uma conta no GitHub com um repositório público criado, se quiser
-  publicar assim que terminarmos
+- Para atualização: pacote/pasta completo da biblioteca atual, seu
+  `bibconfig.claude` mais recente e o `CHANGELOG.md` vigente (normalmente dentro
+  do pacote); mantenha uma cópia de segurança antes de começar
+- Para publicação imediata: conta/repositório público no GitHub e URL prevista
+  do GitHub Pages. As URLs precisam estar confirmadas antes da geração final,
+  pois são usadas nos metadados; se ainda não estiverem prontas, a entrevista
+  pode ser pausada antes da edição/geração
 
 Se ainda não tiver alguma dessas chaves, sem problema — posso te
 guiar durante a entrevista, ou você pode seguir o guia abaixo antes
 de começarmos.
 
-⚠️ O `setup_private.sql`, gerado ao final, contém suas chaves
-privadas. Nunca publique esse arquivo no GitHub nem o compartilhe.
+⚠️ Nunca peço chaves privadas. Não cole chaves do ImgBB/Mistral nem chaves
+privilegiadas do Supabase (`secret` ou `service_role`) na conversa. Só uso a
+chave pública `sb_publishable_` no frontend. Se você colar acidentalmente uma
+chave privada, não a repetirei nem a salvarei; revogue/rotacione-a no painel
+correspondente antes de continuar. As chaves do ImgBB e da Mistral AI são cadastradas
+por você nos Secrets das Edge Functions do Supabase e nunca ficam em arquivo. O `bibconfig.claude` gerado guarda as
+respostas da entrevista e também não deve ser publicado no GitHub.
 
 Você pode interromper e retomar quando quiser — nada é aplicado aos
 arquivos até o fim da entrevista.
@@ -88,27 +100,21 @@ Vamos começar?
 2. Crie uma conta gratuita (e-mail ou GitHub)
 3. Clique em "New Project", escolha nome, senha forte e região mais
    próxima (ex.: South America — São Paulo). Aguarde a criação.
-4. Em "Project Settings → API", copie a "Project URL" (Supabase URL)
-   e a chave "publishable" (formato `sb_publishable_...`)
+4. Abra o diálogo **Connect** do projeto para copiar a **Project URL** e a chave
+   **Publishable** (`sb_publishable_...`), ou localize as chaves em
+   **Settings → API Keys**. Os dois valores devem ser do mesmo projeto.
 
 ### 🖼️ ImgBB (gratuito)
 1. Acesse imgbb.com e crie uma conta gratuita
 2. Vá em "About → API" ou acesse api.imgbb.com e copie a chave
 
-### 🤖 Mistral AI (plano gratuito — botão Vânia)
-1. Acesse console.mistral.ai e crie uma conta
-2. Ative o plano gratuito: sem isso a chave não funciona ("nenhum
-   plano ativo"). Vá em admin.mistral.ai/organization/billing (em
-   celular, ative "Site para computador" se a tela ficar espremida),
-   escolha "Experiment for free", aceite os termos e toque em
-   "Subscribe". Pode pedir verificação de telefone; não pede cartão
-3. Vá em "API Keys" (console.mistral.ai/api-keys), com o workspace
-   "Default Workspace" selecionado, clique em "Create new key" e
-   copie a chave (letras e números, sem prefixo fixo)
-4. O plano gratuito tem limites de uso e não libera os modelos
-   maiores (erro 403 "not available in your subscription tier"); a
-   Vânia usa o `ministral-14b-2512`, liberado nele. Os termos do
-   plano gratuito estão em mistral.ai/terms
+### 🤖 Mistral AI (botão Vânia)
+Para configurar e testar o botão Vânia, siga estes passos:
+
+1. **Confira o modelo e os limites.** O projeto usa `ministral-14b-2512`. Consulte a [página de limites da API](https://admin.mistral.ai/plateforme/limits), acessível após entrar no Admin Panel, para verificar os limites atuais da sua organização. Se trocar o modelo, escolha um compatível com imagens e configure `MISTRAL_MODEL` nos Secrets da Edge Function.
+2. **Crie uma chave da API.** No Admin Panel (https://admin.mistral.ai/), abra **API Keys**, escolha o workspace usado pelo BibVânia e crie uma API key. Copie e guarde a chave em local seguro; não a coloque em HTML, JavaScript ou no repositório.
+3. **Cadastre a chave no Supabase.** No projeto Supabase da biblioteca, abra **Edge Functions → Secrets** e crie o Secret `MISTRAL_API_KEY` com a chave copiada. Ela fica no servidor e não é enviada ao navegador.
+4. **Publique e teste.** Publique a Edge Function `vania-ia` seguindo as instruções da seção [Edge Functions](#edge-functions-publicar-as-funções-e-guardar-as-chaves). Depois, abra no painel administrativo o cadastro de um livro com capa ou verso e teste o botão **Vânia**. Se a API retornar erro de limite (429), consulte os limites da organização e tente novamente mais tarde.
 
 ### 🐙 GitHub (obrigatório para publicação)
 1. Acesse github.com e crie uma conta gratuita
@@ -127,6 +133,18 @@ estiver ausente, devo criá-lo; se estiver duplicado, devo consolidá-lo sem dei
 tags conflitantes. O resultado deve ser válido para uma publicação estática no
 GitHub Pages e não pode expor chaves privadas.
 
+### Contrato de `VERSION.json` e carregador das páginas
+
+Na base, `VERSION.json` contém apenas `bibvania`, a versão da BibVânia Online.
+Em toda biblioteca derivada, manter `bibvania` como versão da base e registrar
+a versão independente da biblioteca em `projeto`, por exemplo:
+`{"bibvania":"3.1","projeto":"1.0"}`. Em `index.html` e `admin.html`, ajustar
+o carregador inline: `window.BIBVANIA_VERSAO` e a metatag `versaobase` recebem
+`data.bibvania`; a metatag `version` recebe `data.projeto` (com fallback para
+`data.bibvania` apenas na base). O verificador de atualização do `admin.html`
+continua comparando `data.bibvania` local com o valor remoto da BibVânia Online.
+Nunca sobrescrever a versão própria da derivada com a versão-base ao carregar a página.
+
 ### Página pública (`index.html`)
 
 Gerar ou atualizar, usando valores coerentes entre si e URLs absolutas quando o
@@ -134,8 +152,10 @@ formato exigir:
 
 - `lang` do HTML (`pt-BR` por padrão), `charset`, `viewport`, `title` e
   `meta description` (texto da descrição para compartilhamento ou fallback adaptado);
-- `author`, `creator`, `publisher`, `copyright`, `license-name`,
-  `license-version`, `license-url`, `source`, `version`, `year`, `tipobib`,
+- `author`, `creator`, `publisher`, `application-name` (Nome do Projeto), `copyright`,
+  `license-name`, `license-version`, `license-url` coerentes com o escopo confirmado
+  (preservar claramente a licença e atribuição da base para material herdado),
+  `source`, `version`, `year`, `tipobib`,
   `tipolabel`, `denominacaoescola`, `nomeescola`, `nomebiblioteca` e `versaobase`;
   os metadados de modalidade e identificação usados pelo rodapé também devem
   existir no `admin.html` com valores iguais aos do `index.html`;
@@ -154,16 +174,27 @@ formato exigir:
 - JSON-LD `schema.org` coerente com a modalidade: entidade principal
   `Library` (ou `Library` + `WebSite` em `@graph`), com `@id`, `name`, `url`,
   `description`, `image`, `logo`, `inLanguage`, `isAccessibleForFree`,
-  `license`, `sameAs`, `mainEntityOfPage`, `creator`/`author` e
+  `license` somente com URL válida e escopo confirmado, `sameAs`,
+  `mainEntityOfPage`, `creator`/`author` e
   `publisher` quando houver dados. Usar o nome e as URLs da biblioteca, não
   os da BibVânia-base. O JSON deve ser JSON válido, sem comentários ou trailing commas;
 - `WebSite`/`SearchAction` só deve ser incluído se a busca pública realmente
   puder ser representada sem inventar uma URL de consulta; não criar schema
   enganoso.
 
+Se a licença escolhida não for uma licença única aplicável à biblioteca inteira,
+usar os metadados da licença herdada da base sem declarar que ela foi relicenciada;
+descrever separadamente o escopo das contribuições próprias em README/LICENCE e
+nos rodapés. Não inventar URL de licença: se não houver uma URL válida para um
+escopo específico, omitir a propriedade/campo correspondente em vez de emitir
+metadado falso. Se a pessoa pretender declarar a biblioteca derivada inteira sem
+licença ou em domínio público, explicar o conflito com direitos e licença herdados
+e pausar até confirmar um escopo possível.
+
 A descrição deve ser a mesma (ou uma versão semanticamente idêntica) no
 `meta description`, Open Graph, Twitter e JSON-LD. O título, URL, imagem OG,
-nome do projeto e licença também devem ser consistentes em todos os blocos.
+nome do projeto e declaração de licença (quando aplicável) também devem ser
+consistentes em todos os blocos, sem apagar a atribuição à base.
 Não adicionar `meta keywords`: é obsoleto e não melhora a descoberta.
 
 ### Painel (`admin.html`)
@@ -188,6 +219,9 @@ metadados técnicos completos e coerentes para compartilhamento controlado:
   no ImgBB, na edição de livros) e o `script-src` deve manter
   `https://cdn.jsdelivr.net` (supabase-js e `@zxing/library`, ambos com versão
   fixa). Remover qualquer um deles desativa a leitura local das barras.
+  O `connect-src` NÃO deve conter `https://api.imgbb.com` nem `https://api.mistral.ai`:
+  essas chamadas passam pelas Edge Functions do Supabase, já cobertas por
+  `https://*.supabase.co`.
 
 ### Rodapé das páginas (`index.html` e `admin.html`)
 Em todas as três instâncias do rodapé (`index.html`, tela de login e painel do
@@ -219,7 +253,7 @@ Em uma biblioteca derivada, a linha de atribuição ao projeto de origem deve fi
 logo abaixo da descrição dinâmica e acima da linha de versão, lançamento e
 licença. O texto é fixo e deve ficar neste formato:
 ```html
-<a href="https://github.com/limaoruan/bibvania" target="_blank" rel="noopener" class="license-link" style="color:var(--primary);font-weight:700;text-decoration:underline;text-underline-offset:2px;">Derivado do Projeto BibVânia</a> <a href="https://www.instagram.com/ruanoliveiralima_/" target="_blank" rel="me author noopener" class="license-link" style="color:var(--primary);font-weight:700;text-decoration:underline;text-underline-offset:2px;">© 2026 Ruan Oliveira Lima</a>.<br>
+<a href="https://github.com/limaoruan/bibvania" target="_blank" rel="noopener" class="license-link">Derivado do Projeto BibVânia</a> <a href="https://www.instagram.com/ruanoliveiralima_/" target="_blank" rel="me author noopener" class="license-link">© 2026 Ruan Oliveira Lima</a>.<br>
 ```
 Regras:
 - "Derivado do Projeto BibVânia" é o hiperlink do repositório do projeto
@@ -229,12 +263,17 @@ Regras:
 - O ano 2026 é o do projeto BibVânia, não o da biblioteca derivada; não trocar
   pelo ano, pelo autor ou pelos links informados na entrevista. Os dados da biblioteca
   derivada continuam na linha de versão, lançamento e licença.
-- Reaproveitar o estilo dos links já existentes no rodapé (classe `license-link`,
-  cor primária, negrito e sublinhado), para funcionar nos modos claro e escuro.
+- Usar a classe `license-link`, sem cor, negrito ou sublinhado fixos no HTML:
+  os links devem herdar a cor e o peso do texto do rodapé. A regra global de
+  `.site-footer` destaca-os somente em `:hover`, `:focus-visible` e `:active`,
+  com a cor primária, negrito e sublinhado, funcionando nos modos claro e escuro.
 - Essa linha existe somente nas bibliotecas derivadas; o projeto original
   BibVânia Online não a tem.
 - Na geração e em toda atualização, conferir os três rodapés: se a linha faltar,
   adicioná-la; se estiver duplicada ou alterada, consolidar com o texto acima.
+- Nos três rodapés, manter `text-align: justify` e não colocar estilo inline de
+  cor, peso ou sublinhado nos links. A aparência normal deve ser a mesma do texto;
+  o destaque só ocorre quando o link recebe hover, foco ou toque/pressão.
 - A linha de versão, lançamento e licença, logo abaixo da linha de atribuição,
   é da biblioteca derivada (ver "Autoria: biblioteca derivada × projeto base"):
   a linha de atribuição nunca recebe os dados da biblioteca, e a linha da
@@ -262,6 +301,96 @@ cabeçalho dos relatórios do painel. Todos leem a meta `nomeprojeto`, por isso 
   `<h1>`. Por isso, em atualização, refazer essa troca sempre, mesmo que nenhum
   campo da entrevista tenha mudado.
 
+### Repositório da biblioteca: botão do menu de atalhos
+
+O botão **📁 Repositório** do menu de atalhos (no `index.html` e no `admin.html`)
+deve abrir o repositório **da própria biblioteca**, não o da BibVânia Online.
+
+- O endereço é lido da meta `source` pelo `abrirRepositorio()`. Por isso, a meta
+  `source` do `index.html` e do `admin.html` deve conter a **URL do Repositório**
+  da biblioteca (campo da seção 5 da entrevista), com o mesmo valor nos dois.
+  Vazia ou fora do formato `http(s)://`, o botão cai no repositório da base.
+- Os dois botões devem ter `onclick="abrirRepositorio()"` e a função
+  `abrirRepositorio` deve existir em cada página. Nunca voltar a escrever a URL
+  direto no `onclick`.
+- **Não trocar** o botão "Ir para o repositório" do modal de atualização
+  (`irParaRepositorioAtualizacao`, no `admin.html`): ele leva ao repositório
+  oficial da base de propósito.
+- Os arquivos-base novos trazem de volta `source` com o repositório da base.
+  Por isso, em atualização, refazer essa troca sempre, mesmo que nenhum campo
+  da entrevista tenha mudado.
+
+### Identidade da biblioteca no cabeçalho e no nome do projeto do rodapé
+
+O bloco de duas linhas com o nome da biblioteca (abaixo do título, no
+`index.html`, na tela de login e no painel do `admin.html`), o aria-label desse
+bloco, os cabeçalhos dos relatórios e do PDF e o nome do projeto em negrito nos
+três rodapés devem mostrar os dados **da biblioteca gerada**, nunca os da
+BibVânia Online (EMTI, Professora Maria Vânia Farias Linhares).
+
+- A **única fonte** são as metas de identidade, que existem com o mesmo valor
+  nos dois HTMLs: `tipobib`, `tipolabel` (Denominação da Biblioteca),
+  `denominacaoescola` (sigla), `nomeescola`, `nomebiblioteca` e `nomeprojeto`.
+  Preencher as da modalidade escolhida e deixar vazias as que não se aplicam.
+- O `<script>` "Identidade da biblioteca nas páginas", logo depois das metas na
+  `<head>` de cada HTML, monta as duas linhas (escolar: "Denominação da
+  Biblioteca da Sigla" e "Nome da Escola"; comunitária: o nome da biblioteca),
+  grava em `nomeesc1` e `nomeesc2` e preenche o bloco de nome, o aria-label e os
+  elementos `data-nome-projeto-rodape`. Preservar esse script.
+- As metas `nomeesc1` e `nomeesc2` existem nos dois HTMLs, mas são **derivadas**:
+  o script as reescreve. Mesmo assim, preencher seus valores iniciais (e o texto
+  dos `<span>` do bloco e dos `<b data-nome-projeto-rodape>`) com os dados da
+  biblioteca, como reserva sem JavaScript. Não usá-las para compor a descrição
+  do rodapé.
+- Em atualização, os arquivos-base novos trazem de volta os dados da BibVânia
+  Online nesses lugares. Refazer o preenchimento sempre, mesmo que nenhum campo
+  da entrevista tenha mudado.
+
+### O que nunca deve apontar para a base (e o que aponta de propósito)
+
+Na geração e em toda atualização, ao final, procurar em TODOS os arquivos por
+"BibVânia", "limaoruan", "ruanoliveiralima", "EMTI", "Maria Vânia" e pelo endereço do
+Supabase da base, e conferir cada ocorrência:
+
+- **Deve virar dado da biblioteca** (preencher): as metas e o JSON-LD da lista
+  acima, incluindo `application-name` (Nome do Projeto); o `title`; os três
+  rodapés; o `manifest.webmanifest`, o `robots.txt` e o `sitemap.xml`; o
+  `README.md`, o `LICENCE.md` e o `CHANGELOG.md`.
+- **Já é automático** (não editar à mão): o `preconnect` ao Supabase e as chaves
+  de armazenamento local (`BIBVANIA_CHAVE`), ambos derivados da `SUPABASE_URL` do
+  `bibconfig.js`, que é o único lugar onde o endereço do banco deve existir; o
+  nome do PDF baixado e os textos alternativos das logos, que usam a meta
+  `nomeprojeto`.
+- **Aponta para a base de propósito** (não trocar): a verificação de versão
+  (`VERSION.json` da base e `limaoruan.github.io` na política de segurança), o
+  botão do modal de atualização, "Derivado do Projeto BibVânia", a atribuição e a
+  licença CC BY-SA e os nomes técnicos internos (`BIBVANIA_*`,
+  `bibvania.reserva_conversion`), que o usuário não vê.
+
+### Chaves de API: Edge Functions (nunca em arquivo)
+
+As chaves do ImgBB e da Mistral AI ficam como **Secrets** das Edge Functions
+`upload-imagem` e `vania-ia` do Supabase da biblioteca. Por isso:
+
+- Nunca peço, aceito, repito nem gravo essas chaves (nem em `bibconfig.claude`,
+  nem em SQL, HTML, JS ou configuração). O arquivo `setup_private.sql` e a tabela
+  `config_privada` não existem mais.
+- Os arquivos raiz `upload-imagem.ts` e `vania-ia.ts` são copiados da base sem
+  alterações para a biblioteca. O arquivo raiz `van-ia.prompt` também é copiado
+  e mantido como fonte do prompt de catalogação; o `admin.html` o carrega sob
+  demanda e continua usando `_chamarEdgeFunction`, `_imgbbEnviar` e
+  `_vaniaIaEnviar`. Nunca restaurar chamadas diretas a `api.imgbb.com` ou
+  `api.mistral.ai` nem `BibChaves`. Para deploy via Supabase CLI, orientar a
+  copiar os fontes para `supabase/functions/<nome>/index.ts` no projeto CLI.
+- Na atualização de uma biblioteca antiga (que ainda tinha `setup_private.sql`
+  ou `config_privada`), orientar a cadastrar os Secrets, publicar as funções e
+  testar antes de qualquer limpeza. Só recomendar o comando
+  `DROP TABLE IF EXISTS public.config_privada;` se a pessoa confirmar que essa é a tabela legada, que
+  nenhum dado precisa ser migrado e que autoriza a exclusão; exigir backup antes.
+  Se a origem/conteúdo forem incertos, não executar nem recomendar o comando como
+  passo obrigatório. O `setup_private.sql` antigo pode ser removido do repositório
+  depois de verificar que já não é necessário para recuperação.
+
 ### Autoria: biblioteca derivada × projeto base
 
 Toda biblioteca derivada tem **dois autores distintos, e um nunca substitui o
@@ -281,6 +410,11 @@ outro** — nem na criação, nem em atualização:
   `<link rel="author">` e `<link rel="me">` (Site do Autor) e, no JSON-LD,
   `author`/`creator`/`publisher` (e `url`/`sameAs` do autor, quando houver Site
   do Autor);
+- Ao criar ou alterar `index.html` ou `admin.html`, atualizar o respectivo
+  `<meta name="revised">` para a data e hora reais da revisão em ISO 8601, com
+  fuso explícito (no projeto-base, `-03:00`). Registrar a alteração no
+  `CHANGELOG.md` com data/hora local real; o timestamp de modificação do arquivo
+  é atualizado pelo sistema ao salvar e nunca deve ser inventado ou ajustado à mão.
 - a linha de versão, lançamento e licença dos três rodapés:
   `Versão: <Versão do Projeto> · Lançamento <Ano de Lançamento> ·
   © <Ano de Lançamento> <Autor do Projeto> ·` + link do Site do Autor + licença
@@ -324,7 +458,10 @@ BibVânia Online, que é a base.
 (H1) e a linha de apresentação do `README.md`, o título do `LICENCE.md`, o título
 do `CHANGELOG.md`, a meta `nomeprojeto` e o título do cabeçalho (`<h1 data-nome-projeto>`)
 do `index.html` e do `admin.html` (ver "Nome do Projeto: título do cabeçalho, PDF e
-relatórios"), os rodapés e os metadados das páginas (`title`, Open Graph,
+relatórios"), a meta `source` e o botão Repositório do menu de atalhos (ver
+"Repositório da biblioteca: botão do menu de atalhos"), as metas de identidade e os
+elementos que dependem delas (ver "Identidade da biblioteca no cabeçalho e no nome do
+projeto do rodapé"), os rodapés e os metadados das páginas (`title`, Open Graph,
 manifest, JSON-LD, já cobertos no contrato acima) e os links do acervo público e
 do repositório da própria biblioteca.
 
@@ -358,17 +495,66 @@ Projeto no `README.md` e conferir que ele não aparece nesses trechos.
   administrativos equivalentes, e apontar para o `sitemap.xml` absoluto;
 - `sitemap.xml`: XML válido, URL pública canônica, `lastmod` em formato ISO
   somente quando a data for conhecida, e nenhum painel/arquivo privado;
-- `VERSION.json`: preservar a versão-base e registrar a versão do projeto;
-- `.github/workflows/manter-supabase-ativo.yml`: gerar e manter um único workflow
-  do GitHub Actions, com execução agendada e `workflow_dispatch`, fazendo uma
-  consulta pública leve ao Supabase. Usar somente a URL e a chave pública
-  `publishable` do arquivo `bibconfig.js`; nunca inserir chaves privadas de
-  ImgBB, Mistral AI, `service_role` ou qualquer segredo no YAML.
+- `VERSION.json`: manter a versão-base em `bibvania` e a versão própria em
+  `projeto`; ajustar os carregadores dos dois HTMLs para não sobrescrever `version`;
+- `README.md`: manter a seção "Mantendo o Supabase sempre ativo" com o modelo
+  Playwright completo e copiável para o Browser Check do Checkly, usando a URL
+  pública daquela biblioteca. O README é a única cópia de exemplo/modelo; não
+  criar pasta `checkly/` nem arquivo de teste separado. O script usa somente a
+  URL pública e nunca inclui chaves privadas, `service_role` ou qualquer segredo.
+
+### Carregamento das capas no catálogo público
+
+Ao gerar ou atualizar uma biblioteca derivada, preservar no `index.html` o
+carregamento direto da capa atualmente visível, com `loading="eager"`,
+`fetchpriority="high"` e `decoding="async"`. O pré-carregamento em segundo
+plano deve ordenar a primeira URL pela capa visível do carrossel, e não pela
+ordem bruta retornada pelo banco; as demais capas devem usar prioridade baixa e
+continuar sendo carregadas em background. Manter o `preconnect` ao domínio
+público usado pelas imagens (atualmente `https://i.ibb.co`), sem alterar a
+qualidade, a URL original, a validação de placeholder ou a lógica de reservas.
+Essa otimização é exclusiva de desempenho e não deve expor dados de
+empréstimos nem mover chamadas para fora das permissões já existentes.
+O catálogo público também não deve ocultar o `.book-item` inteiro com
+`opacity: 0` enquanto espera o evento `load` da imagem: o card deve permanecer
+visível e a capa deve aparecer assim que o navegador receber os pixels.
+
+---
+
+### Regra de versão em atualizações
+
+Em `BibMaker update` ou no fluxo de atualização escolhido por `BibMaker`, a
+versão do projeto da biblioteca é independente da versão da BibVânia Online.
+No `VERSION.json` derivado, gravar a versão-base em `bibvania` e a versão da
+biblioteca em `projeto`; `versaobase` é uma metatag HTML, não um campo substituto
+para a versão própria. A versão-base nunca pode substituir a versão do projeto.
+
+1. Ler a versão atual da biblioteca no `VERSION.json` enviado e conferir com a
+   versão salva no `bibconfig.claude`, quando ambas existirem. Se divergirem,
+   interromper e pedir confirmação antes de editar.
+2. Se a pessoa não escolher expressamente outra versão durante a atualização,
+   usar a versão atual da biblioteca + `0.1`. Exemplos: `1.6` → `1.7`, `1.9`
+   → `2.0`. Fazer o cálculo em décimos inteiros, sem erro de ponto flutuante.
+3. Se a pessoa escolher outra versão, aceitar somente o formato `x.y` já usado
+   pelo BibMaker e usar exatamente o valor confirmado.
+4. Gravar a versão escolhida ou incrementada em `VERSION.json` no campo `projeto`,
+   nos metadados, nos rodapés, no `README.md`, no `LICENCE.md`, no `bibconfig.claude` e no
+   `CHANGELOG.md` da biblioteca. Não copiar a versão da base para nenhum desses
+   campos de versão do projeto.
+5. Em uma criação nova, continuar usando a versão inicial informada na
+   entrevista; esta regra de incremento automático vale somente para atualização.
+
+---
 
 ### Regras para atualização
 
 Em uma atualização com `bibconfig.claude`, repetir a auditoria mesmo que nenhum
-campo da entrevista tenha mudado. Corrigir metadados ausentes, duplicados,
+campo da entrevista tenha mudado. Exigir e identificar separadamente: (a) os
+arquivos-base completos da nova versão; (b) o pacote/pasta completo da biblioteca
+derivada atual; e (c) o `bibconfig.claude` atual. O `VERSION.json` dentro da
+biblioteca derivada é a fonte da versão atual do projeto; o `VERSION.json` dos
+arquivos-base informa somente a versão nova da base. Nunca usar um no lugar do
+outro. Antes de editar, guardar intacta uma cópia do pacote atual. Corrigir metadados ausentes, duplicados,
 referências à BibVânia-base e URLs antigas (exceto as atribuições ao autor da
 base da lista B de "Autoria: biblioteca derivada × projeto base", que
 permanecem, e as referências à base de "Nome da biblioteca × referências à
@@ -377,11 +563,34 @@ biblioteca: o autor da base nunca prevalece sobre o da biblioteca. Preservar per
 existentes que não contradigam os dados confirmados; confirmar qualquer dado
 ambíguo em vez de inventá-lo. Validar ao final: um único `title`, um único
 canonical, a meta `nomeprojeto` e o texto de cada `<h1 data-nome-projeto>` iguais ao
-Nome do Projeto nos dois HTMLs (nunca "BibVânia Online" em biblioteca derivada), JSON-LD parseável, URLs absolutas nos campos sociais/canonical/sitemap,
+Nome do Projeto nos dois HTMLs (nunca "BibVânia Online" em biblioteca derivada),
+`version` igual a `VERSION.json.projeto`, `versaobase` igual a `VERSION.json.bibvania`
+e os carregadores inline mantendo essa distinção; a meta `source` igual à URL do
+Repositório da biblioteca e o botão Repositório com
+`abrirRepositorio()` (exceto o do modal de atualização, que continua na base), as metas de
+identidade preenchidas conforme a modalidade, o script de identidade presente nos dois
+HTMLs e o nome da biblioteca (nunca EMTI / Professora Maria Vânia Farias Linhares) no
+bloco de nome da escola e no `data-nome-projeto-rodape` dos três rodapés, e a busca final
+de "O que nunca deve apontar para a base" sem sobras fora das exceções de propósito, JSON-LD parseável, URLs absolutas nos campos sociais/canonical/sitemap,
 `admin.html` fora do sitemap, CSP do `admin.html` com `https://*.ibb.co` no
 `connect-src` e `https://cdn.jsdelivr.net` no `script-src`, nenhum
-`setup_private.sql`/`bibconfig.claude` dentro da pasta pública, e o workflow `.github/workflows/manter-supabase-ativo.yml`
-presente, válido e apontando para a configuração pública atualizada.
+`bibconfig.claude` dentro da pasta pública, os arquivos raiz `upload-imagem.ts` e `vania-ia.ts` presentes e sem chaves, CSP sem `api.imgbb.com` e `api.mistral.ai`, e o modelo Playwright completo no README, com a URL pública atualizada e sem pasta `checkly/`.
+
+Na atualização, comparar explicitamente os arquivos da biblioteca atual e da nova
+base, sobretudo `supabase_setup.sql` e os fontes `upload-imagem.ts` e `vania-ia.ts`.
+Preservar os Secrets já cadastrados; nunca pedir seus valores. Informar se há
+migração SQL necessária, quais funções mudaram e precisam de novo deploy, e quais
+testes devem ser repetidos. Se nada mudou nessas áreas, declarar isso. O BibMaker
+nunca executa SQL nem publica Edge Functions: antes de qualquer migração, orientar
+a pessoa a fazer backup do banco pelo método disponível no plano Supabase e só
+aplicar mudanças depois de revisão e autorização dela. Para o sistema publicado,
+manter cópia de segurança do repositório/ZIP anterior até validar a atualização.
+
+Ao preservar imagens escolhidas como "manter", localizar os arquivos reais no
+pacote atual e confirmar que foram copiados para a nova pasta, que os caminhos
+referenciados continuam válidos e que as dimensões permanecem corretas. Caminhos
+locais gravados no `bibconfig.claude` não comprovam que o arquivo está disponível.
+Se um arquivo não estiver acessível, pedir que seja reenviado antes de gerar.
 
 ---
 
@@ -396,8 +605,9 @@ Ao processar este arquivo, devo:
    claro de criar vale como `BibMaker create`; um de atualizar, como
    `BibMaker update`)
 0.1. Comandos aceitos (sem diferenciar maiúsculas de minúsculas e ignorando
-   espaços extras). Qualquer outra palavra depois de `BibMaker` é ignorada e
-   o comando vale como `BibMaker` simples:
+   espaços extras): somente `BibMaker`, `BibMaker create` e `BibMaker update`.
+   Se houver qualquer argumento ou palavra adicional não reconhecida, não iniciar
+   nenhum fluxo: explicar as três formas válidas e pedir que a pessoa escolha.
    - `BibMaker create` — vou direto para a **criação de uma biblioteca nova**:
      entrevista completa, seção por seção, a partir da seção 1, sem esperar
      mais nada. As regras 0.5 a 0.10 (fluxo de atualização) não se aplicam.
@@ -405,20 +615,21 @@ Ao processar este arquivo, devo:
      não o trato como atualização: aviso em uma frase que ele foi ignorado e
      que, para atualizar, o comando é `BibMaker update`. Um `bibconfig.claude`
      em branco é só o modelo e segue normalmente
-   - `BibMaker update` — vou direto para a **atualização de uma biblioteca
-     derivada**, sem a decisão da regra 0.5. Exige um `bibconfig.claude`
-     preenchido (ao menos um campo). Se não foi enviado, ou está em branco,
-     não começo uma entrevista do zero: peço o arquivo (o gerado na criação ou
-     na última atualização da biblioteca) e, se a pessoa não o tiver, explico
-     que sem ele não há como atualizar e ofereço `BibMaker create`. Com ele,
-     sigo as regras 0.6 a 0.10 e o restante do fluxo de atualização
+   - `BibMaker update` — vou direto para a **atualização** de uma biblioteca
+     derivada**, sem a decisão da regra 0.5. Exige o `bibconfig.claude`
+     preenchido, o pacote/pasta completo da biblioteca derivada atual e os
+     arquivos-base completos novos. Se faltar qualquer um, não começo a edição:
+     peço o material ausente e explico que sem o `bibconfig.claude` não há como
+     recuperar as respostas da entrevista; com o material completo, sigo as
+     regras 0.6 a 0.10 e o restante do fluxo de atualização
    - `BibMaker` (sozinho) — comportamento de sempre: decido pela regra 0.5
 0.5. Com o comando `BibMaker` sozinho (regra 0.1), se um `bibconfig.claude` foi enviado junto, verificar se está
-   preenchido ou em branco (o modelo de referência da pasta principal
-   da BibVânia Online). Critério objetivo: checar **todos** os campos do
-   arquivo (não só um subconjunto fixo). Se todos estiverem vazios
-   (nada escrito depois dos dois-pontos em nenhum campo), o arquivo
-   é o modelo em branco. Se **qualquer um** deles tiver valor —
+   preenchido ou em branco. A pasta-base não contém um `bibconfig.claude`
+   separado; o modelo está embutido neste arquivo. Critério objetivo: checar
+   **todos** os campos, não só um subconjunto fixo. Para cada campo, remover
+   comentários HTML `<!-- ... -->`, instruções e exemplos do modelo antes de
+   avaliar o texto depois dos dois-pontos. Se todos os valores reais estiverem
+   vazios, o arquivo é o modelo em branco. Se **qualquer um** deles tiver valor —
    qualquer campo, basta um preenchido — o arquivo já é tratado como
    preenchido de verdade, como se fosse uma geração já existente com
    pelo menos um dado salvo; não precisa ser 100% completo. Só pular a
@@ -435,13 +646,18 @@ Ao processar este arquivo, devo:
 0.7. Mecanismo de confirmação no fluxo de atualização: ao chegar em
    cada seção da entrevista (regra 1 abaixo), para os campos daquela
    seção que já vieram preenchidos no `bibconfig.claude`, mostro o
-   valor atual de cada um (incluindo chaves de API, em texto puro,
-   sem mascarar — quem envia um `bibconfig.claude` preenchido já é o
-   próprio desenvolvedor/dono das chaves) e pergunto se a pessoa quer
+   valor atual de cada um e pergunto se a pessoa quer
    mantê-lo ou trocá-lo — nunca sigo em silêncio assumindo que o
    valor salvo continua válido. Campos que a pessoa confirmar como
    "manter" não entram no resumo final da seção "Depois do
-   Preenchimento" (só o que realmente mudou aparece lá)
+   Preenchimento" (só o que realmente mudou aparece lá). **Exceção obrigatória:
+   a Versão do Projeto nunca é mantida automaticamente em uma atualização.**
+   Leio a versão atual no `VERSION.json` dentro do pacote/pasta da biblioteca
+   derivada atual e comparo com o `bibconfig.claude`. O `VERSION.json` dos
+   arquivos-base novos informa apenas a versão-base. Se o `VERSION.json` da
+   biblioteca atual faltar, peço-o; se divergir do `bibconfig.claude`, interrompo
+   e peço confirmação. Só então calculo a próxima versão somando 0,1 e mostro
+   essa proposta — nunca uso a versão da BibVânia-base como versão do projeto.
 0.8. Se a pessoa escolher trocar um campo (regra 0.7), peço o novo
    valor ali mesmo, na hora — a mesma pergunta e as mesmas validações
    que valeriam numa entrevista do zero para aquele campo (formato
@@ -449,63 +665,88 @@ Ao processar este arquivo, devo:
    se for o caso, etc.). O novo valor substitui o antigo no
    `bibconfig.claude` regenerado ao final, e o campo entra no resumo
    final da seção "Depois do Preenchimento" como algo que mudou
-0.9. Se a pessoa enviar a pasta ou o `.zip` completo de uma biblioteca
-   (a BibVânia Online base ou uma biblioteca derivada) que contenha
-   `bibhash.sig`, calculo o hash pelo método da regra 7 abaixo e
-   comparo com o valor guardado. Se divergir, mostro o hash calculado
-   e o armazenado e não prossigo com nenhuma alteração até a pessoa
-   confirmar explicitamente
-0.10. No fluxo de atualização, o `CHANGELOG.md` da biblioteca derivada
-   precisa ser preservado: se a pessoa não enviou o `CHANGELOG.md`
-   atual da biblioteca, peço o arquivo antes de gerar o `.zip`, para
-   manter o histórico e a numeração. Mantenho todas as entradas
-   existentes e nunca copio entradas do `CHANGELOG.md` da BibVânia
-   Online base. Se o campo "Versão do Projeto" mudou, acrescento no
-   topo uma entrada sobre o `VERSION.json` com o próximo ID. Se a
-   pessoa não tiver o arquivo, aviso que um novo changelog recomeça do
-   `#1` e só gero um novo com a confirmação dela
+0.9. A atualização exige o pacote/pasta atual completo da biblioteca derivada.
+   Se houver `bibhash.sig`, recalculo o hash da pasta do projeto, mostro o valor
+   calculado e o armazenado e interrompo diante de divergência até confirmação
+   explícita. Se a assinatura estiver ausente ou não puder ser verificada, aviso
+   que a integridade não foi validada e peço confirmação antes de editar; nunca
+   trato ausência como validação aprovada. Depois de montar o novo ZIP, extraio-o
+   em uma pasta temporária, entro na pasta do projeto (não na raiz do ZIP) e
+   recalculo sem `bibhash.sig` nem `bibconfig.claude`; comparo com o digest gravado
+   e informo o resultado final.
+0.9.1. Em criação e atualização, se os arquivos-base enviados contiverem
+   `bibhash.sig`, recalcular e comparar antes de usá-los. Se divergir, interromper,
+   mostrar os dois valores e pedir confirmação explícita. Se a assinatura estiver
+   ausente ou não puder ser verificada, avisar que a integridade da base não foi
+   validada; nunca chamar isso de aprovação.
+0.10. No fluxo de atualização, preservar o `CHANGELOG.md` que está dentro do
+   pacote atual da biblioteca derivada, mantendo todas as entradas e a numeração;
+   nunca copiar entradas do changelog da BibVânia-base. Se estiver ausente,
+   solicitar o arquivo atual antes de gerar. Recomeçar em `#1` somente se a pessoa
+   autorizar explicitamente a perda do histórico. Criar entrada(s) para todas as
+   alterações realmente aplicadas, com arquivos/áreas afetados e detalhe
+   suficiente; mencionar a nova versão quando ela mudar, sem limitar o registro
+   apenas a `VERSION.json`.
 1. Conduzir a entrevista seção por seção, na ordem abaixo
 2. Perguntar apenas os campos condicionais relevantes ao tipo de
    biblioteca escolhido
-3. Ao final, aplicar as edições diretamente nos arquivos-base do
-   BibVânia Online (edição cirúrgica, não reescrita estrutural)
-4. Gerar ou atualizar `.github/workflows/manter-supabase-ativo.yml` com o
-   mesmo padrão do arquivo-base: agendamento periódico, `workflow_dispatch`,
-   consulta pública leve e uso exclusivo da chave `publishable` do
-   `bibconfig.js`; esse é o único arquivo YAML de manutenção necessário
-5. Gerar `README.md` como cópia do da BibVânia Online (troca só nome,
-   links e a linha "Desenvolvido por" do cabeçalho, que passa a ser o autor da
-   biblioteca; o nome da biblioteca entra só onde identifica a biblioteca: as
-   referências à BibVânia Online base permanecem, ver "Nome da biblioteca ×
-   referências à BibVânia Online base") e `LICENCE.md` mantendo a estrutura de seções (adaptando
-   textos de permissões/condições ao tipo de licença informado,
-   inclusive Sem Licença/Domínio Público, e sempre incluindo ao
-   final uma seção "Derivado da BibVânia Online" com os dados da BibVânia Online),
-   além de `VERSION.json` com a versão base e a versão do projeto
-5.5. Gerar o `CHANGELOG.md` próprio da biblioteca (ver o item 7.5 de
-   "Depois do Preenchimento"): nunca copiar as entradas do
-   `CHANGELOG.md` da BibVânia Online base
-6. Gerar `bibconfig.claude` com todas as respostas da entrevista
-   (incluindo as chaves de API) — arquivo de configuração salva
-   para facilitar atualizações futuras
-7. Gerar o `bibhash.sig` próprio da biblioteca, como último passo
-   antes de montar o `.zip`, com todos os arquivos da pasta do projeto
-   já finais. O hash cobre só a pasta do projeto (não inclui
-   `setup_private.sql` nem `bibconfig.claude`, que ficam fora dela).
-   Método exato: dentro da pasta do projeto, sem o `bibhash.sig`,
-   executar `LC_ALL=C find . -type f | sort | xargs sha256sum | sha256sum`
-   e gravar os 64 caracteres hexadecimais com `echo -n`, sem quebra de
-   linha. Nunca copiar o `bibhash.sig` da BibVânia Online base
-8. Entregar tudo em um único arquivo `.zip`, nomeado igual à pasta
-   do projeto (ex.: projeto "Biblioteca João Silva" →
-   `biblioteca-joao-silva.zip`): uma pasta com o nome do
-   projeto contendo todos os arquivos da biblioteca — inclusive o
-   `bibmaker.claude`, o `bibmaker-logo.png`, o `CHANGELOG.md` próprio da
-   biblioteca e o `bibhash.sig` — (exceto `setup_private.sql` e
-   `bibconfig.claude`), com `setup_private.sql` e `bibconfig.claude`
-   soltos na raiz do
-   `.zip`, fora dessa pasta — assim, se a pessoa subir só a pasta
-   para o GitHub, nenhum dos dois vai com ela
+3. Trabalhar numa cópia de trabalho dos arquivos-base (edição cirúrgica, não
+   reescrita estrutural); nunca alterar ou sobrescrever os arquivos-base enviados.
+   Em atualização, mesclar a biblioteca derivada atual com a nova base para
+   preservar personalizações, imagens e arquivos próprios. Se houver conflito,
+   explicar as opções e pedir decisão antes de substituir qualquer conteúdo.
+4. Manter no `README.md` o modelo Playwright completo e copiável para o Checkly,
+   com a URL pública da biblioteca derivada em todos os trechos executáveis.
+   Substituir a URL da BibVânia-base no modelo. Não criar pasta `checkly/` nem
+   arquivo de teste separado; o agendamento é externo ao repositório.
+5. Gerar `README.md` como cópia adaptada do README-base: atualizar nome, links,
+   URL do modelo Checkly, autoria e dados do projeto. Corrigir a frase sobre o
+   nome do projeto: ele é informado diretamente na entrevista, não gerado pelo
+   tipo de biblioteca. Adaptar a seção "Licença" à opção confirmada e explicar
+   que ela não relicencia material herdado da base nem componentes de terceiros;
+   manter a atribuição e CC BY-SA 4.0 da base separadas da licença das
+   contribuições próprias. Preservar "BibVânia Online" quando a referência for
+   deliberadamente à base, conforme "Nome da biblioteca × referências à base".
+6. Gerar `LICENCE.md` a partir da estrutura real da licença-base: "Você tem
+   permissão para", "Sob as seguintes condições", "Escopo e arquivos desta
+   cópia-base" (adaptado à derivada) e "Serviços e componentes de terceiros".
+   Inventariar somente arquivos existentes; manter o aviso de que a listagem de
+   ativos não comprova autoria/proveniência; reproduzir a tabela completa de
+   componentes e termos vigente na base, inclusive Claude e Web Speech API.
+   Para `sem` ou `dominio`, nunca declarar que a escolha revoga CC BY-SA 4.0 da
+   base ou direitos de terceiros. Se o alcance jurídico da escolha for ambíguo,
+   explicar o limite e pedir confirmação antes de redigir afirmações de licença.
+7. Gerar `VERSION.json` com `bibvania` igual à versão-base da BibVânia Online e
+   `projeto` igual à versão independente da biblioteca; manter esses valores
+   separados também nas metatags e nos carregadores inline dos dois HTMLs.
+7.5. Gerar/manter o `CHANGELOG.md` próprio, sem copiar entradas da base. Na
+   criação, uma entrada inicial `#1` pode resumir a geração inteira, mas deve
+   listar as áreas/arquivos principais criados ou personalizados e a versão
+   inicial — não registrar somente `VERSION.json`. Em atualização, conservar o
+   histórico e criar entrada(s) para todas as alterações efetivamente aplicadas,
+   indicando áreas/arquivos e a versão nova quando mudar. Usar ID sequencial,
+   data e hora local real; nunca inventar timestamp nem alterar mtime do sistema.
+8. Gerar/regenerar `bibconfig.claude` com as respostas confirmadas, sem segredos.
+   Depois de atualizar, manter a configuração anterior em backup privado até
+   conferir o ZIP e a nova configuração; só então substituir a cópia de uso e
+   guardar backup privado da nova.
+9. Gerar `bibhash.sig` como último passo antes do ZIP, dentro da pasta do projeto.
+   O hash cobre somente os arquivos dessa pasta, sem `bibhash.sig` e sem
+   `bibconfig.claude` (que fica fora dela). Usar
+   `LC_ALL=C find . -type f | sort | xargs sha256sum | sha256sum` e gravar
+   exatamente os 64 caracteres hexadecimais, sem quebra de linha. Nunca copiar
+   a assinatura da base. Após compactar, extrair o ZIP temporariamente, entrar na
+   pasta do projeto e repetir o cálculo excluindo a assinatura; se divergir,
+   corrigir antes de entregar e informar o digest. Alterações manuais posteriores
+   exigem recalcular a assinatura.
+10. Normalizar o nome do projeto para um único `slug`: minúsculas, sem acentos,
+   somente `a-z`/`0-9`, espaços e pontuação convertidos em um hífen, hífens
+   repetidos colapsados e hífens nas pontas removidos. Usar o mesmo slug para
+   a pasta `<slug>/` e o arquivo `<slug>.zip`; manter o nome legível da biblioteca
+   nos metadados. Dentro do ZIP, incluir a pasta do projeto com todos os arquivos
+   públicos e de manutenção (`bibmaker.claude`, `bibmaker-logo.png`, changelog e
+   hash), e colocar `bibconfig.claude` separado na raiz do ZIP, fora da pasta
+   publicável. Não incluir a configuração privada na pasta enviada ao GitHub.
 
 ---
 
@@ -524,12 +765,30 @@ Regras que sigo enquanto pergunto:
 5. Perguntar também a descrição opcional para compartilhamento/Open
    Graph. Se a pessoa deixar esse campo vazio, manter a descrição
    padrão do BibMaker, adaptada ao tipo e ao nome da biblioteca.
-6. Se "Versão do Projeto" ou "Versão da Licença" vierem fora do
-   formato x.y, aviso e peço a correção antes de seguir.
-7. Se "Nome da Licença" ficar em branco, pulo Versão/Descrição/URL
-   da licença e aplico automaticamente CC-BY-SA 4.0 da BibVânia Online.
+6. Se "Versão do Projeto" vier fora do formato x.y, pedir correção. Validar
+   "Versão da Licença" no formato x.y somente quando o tipo for `com` e a pessoa
+   informar uma versão; para `sem` ou `dominio`, não exigir campos de licença que
+   não se aplicam.
+7. Só quando o tipo for `com`, se "Nome da Licença" ficar em branco, propor
+   CC BY-SA 4.0 como padrão e pedir confirmação; se outra licença for escolhida,
+   verificar se ela pode ser aplicada ao material herdado, sem declarar que a base
+   foi relicenciada. Para `sem` ou `dominio`, esclarecer que a escolha só pode se
+   referir ao material original que a pessoa tem direito de licenciar; preservar
+   em separado CC BY-SA 4.0 e atribuição para material derivado da base, além dos
+   termos de terceiros. Se a pessoa quiser declarar a biblioteca inteira sem
+   licença/em domínio público, explicar o conflito e pausar até confirmar um
+   escopo possível; não gerar declaração ambígua.
 8. Se você não tiver alguma chave de API em mãos, posso indicar o
    trecho do guia acima pra você buscar naquele momento.
+9. Validar os valores enumerados (`escolar`/`comunitaria`, `com`/`sem`/`dominio`)
+   e o formato de todas as URLs antes de avançar. URL do Supabase deve ser a
+   Project URL HTTPS copiada do projeto; confirmar no painel que ela e a chave
+   `sb_publishable_` pertencem ao mesmo projeto. Nunca pedir `secret` ou
+   `service_role`; se forem coladas, não repetir nem registrar e recomendar
+   revogação/rotação imediata.
+10. As URLs de GitHub informadas devem usar HTTPS e identificar o repositório
+    público correto e a URL de publicação dessa mesma biblioteca. Aceitar domínio
+    personalizado somente com confirmação explícita da pessoa.
 
 ### 1. Dados da Biblioteca
 **Tipo de biblioteca:** <!-- escolar | comunitaria -->
@@ -575,6 +834,13 @@ Após validar cada arquivo, informar explicitamente o resultado, por exemplo:
 aprovado`. Registrar essas dimensões no `bibconfig.claude` e, quando a imagem for usada nos metadados Open Graph, atualizar também `og:image:width` e
 `og:image:height` com os valores reais do arquivo.
 
+Em uma atualização, "manter" só é válido se o arquivo real estiver acessível no
+pacote/pasta atual enviado. Localizar e copiar cada imagem preservada para a nova
+biblioteca, conferir se os caminhos no HTML/manifest continuam válidos e medir
+novamente as dimensões. Caminho gravado no `bibconfig.claude` não substitui o
+arquivo. Se a imagem não estiver no pacote, pedir que seja reenviada antes de
+gerar; não restaurar silenciosamente a imagem da base.
+
 **Logo:** <!-- obrigatório; caminho do arquivo -->
 **Exemplo:** `/home/ana/Imagens/logo-biblioteca.png` — dimensões mínimas `600 × 360 px`, proporção `5:3`
 **Dimensões confirmadas:** <!-- largura × altura px — proporção -->
@@ -585,15 +851,13 @@ aprovado`. Registrar essas dimensões no `bibconfig.claude` e, quando a imagem f
 **Exemplo:** `/home/ana/Imagens/compartilhamento-1200x630.png` — dimensões mínimas `1200 × 630 px`, proporção `40:21`
 **Dimensões confirmadas:** <!-- largura × altura px — proporção -->
 
-### 3. Chaves de API
+### 3. Supabase (URL e chave pública)
 **URL do Supabase:** <!-- obrigatório -->
 **Exemplo:** `https://abcdefghijklmnop.supabase.co` (domínio fictício; substitua pela URL real)
 **Chave Publishable do Supabase:** <!-- obrigatório; formato sb_publishable_... -->
 **Exemplo:** `sb_publishable_EXEMPLO_NAO_UTILIZAR_1234567890` (fictício; nunca use esta sequência como chave real)
-**Chave do ImgBB:** <!-- obrigatório, vai para setup_private.sql -->
-**Exemplo:** `0123456789abcdef0123456789abcdef` (exemplo fictício; informe a chave real somente na conversa privada)
-**Chave da Mistral AI:** <!-- obrigatório, vai para setup_private.sql, alimenta o botão Vânia -->
-**Exemplo:** `EXEMPLO_NAO_UTILIZAR_1234567890` (sem prefixo fixo; exemplo fictício; nunca use esta chave)
+**Validação:** confirmar que a URL é HTTPS, tem host válido e foi copiada do mesmo projeto Supabase que fornece a chave `sb_publishable_`. Se não for possível confirmar a associação no painel, pausar e pedir confirmação; não gravar um par incompatível.
+**Atenção:** as chaves do ImgBB e da Mistral AI NÃO são perguntadas aqui. Elas são cadastradas depois, pelo próprio usuário, como Secrets das Edge Functions (passo 2 da seção "Depois do Preenchimento"). Se a pessoa tentar digitar uma dessas chaves, não a aceito, não a repito e lembro que ela vai nos Secrets.
 
 ### 4. Dados do Projeto
 **Nome do Projeto:**
@@ -604,27 +868,35 @@ aprovado`. Registrar essas dimensões no `bibconfig.claude` e, quando a imagem f
 **Exemplo:** `https://www.instagram.com/exemplo_autor/` — ou deixe vazio (fictício; nunca o Instagram da BibVânia Online)
 **Ano de Lançamento:** <!-- automático, ano atual -->
 **Exemplo:** `2026`
-**Versão do Projeto:** <!-- editável, padrão x.y (ex.: 1.0, 2.3) -->
-**Exemplo:** `1.0`
+**Versão do Projeto:** <!-- criação: informe x.y; atualização: proposta automática = versão atual da biblioteca + 0,1, salvo escolha explícita -->
+**Exemplo:** `1.0` na criação; `1.6` → `1.7` em atualização
 **Descrição para compartilhamento/Open Graph:** <!-- opcional; se vazio, usar a descrição padrão do BibMaker -->
 **Exemplo:** `Pesquise livros, consulte a disponibilidade e explore o acervo da Biblioteca Maria Vânia.` — ou deixe vazio
 
 #### Licença
-**Tipo de Licença:** <!-- com | sem | dominio -->
+**Tipo de Licença:** <!-- com | sem | dominio; escolha exatamente uma opção -->
 **Exemplo:** `com` (licença com condições), `sem` (sem licença) ou `dominio` (domínio público)
-**Nome da Licença:** <!-- se vazio, herda CC-BY-SA 4.0 da BibVânia Online e pula Versão/Descrição/URL -->
+**Nome da Licença:** <!-- se `com` e vazio, propor CC BY-SA 4.0 da base e pedir confirmação; registrar escopo separado para `sem` ou `dominio` -->
 **Exemplo:** `Creative Commons Atribuição-CompartilhaIgual 4.0 Internacional`
-**Versão da Licença:** <!-- padrão x.y (ex.: 4.0, 2.1) -->
+**Versão da Licença:** <!-- padrão x.y quando aplicável (ex.: 4.0, 2.1) -->
 **Exemplo:** `4.0`
 **Descrição/Texto da Licença:** <!-- capturada verbatim se vazio -->
 **Exemplo:** `Você pode compartilhar e adaptar este material, desde que dê o crédito adequado.`
 **URL da Licença:** <!-- opcional, mesmo com nome informado -->
 **Exemplo:** `https://creativecommons.org/licenses/by-sa/4.0/deed.pt-BR`
+**Escopo/Confirmação:** <!-- obrigatório se `sem`, `dominio` ou licença mista: dizer a que material se aplica; não apagar CC BY-SA da base nem termos de terceiros -->
+**Exemplo:** `A opção de domínio público refere-se apenas às minhas contribuições originais; os arquivos derivados da BibVânia continuam atribuídos e sob CC BY-SA 4.0.`
 
 ### 5. GitHub
-**URL do Repositório:**
+As URLs são necessárias antes da geração final porque alimentam `source`, canonical,
+sitemap e o modelo Checkly. Podem ser informadas no fim da entrevista, mas não
+deixar valores fictícios nem gerar metadados públicos incompletos. Validar HTTPS,
+formato do repositório público e coerência entre a URL de Pages e o repositório;
+aceitar domínio personalizado somente se a pessoa confirmar que ele já aponta para
+essa biblioteca.
+**URL do Repositório:** <!-- obrigatório antes de gerar -->
 **Exemplo:** `https://github.com/ruanolima/biblioteca-maria-vania`
-**URL da Página GitHub Pages:**
+**URL da Página GitHub Pages:** <!-- obrigatório antes de gerar -->
 **Exemplo:** `https://limaoruan.github.io/biblioteca-maria-vania/`
 
 ---
@@ -643,90 +915,62 @@ Ao final da entrevista:
      derivada, nunca o de outro projeto), usando o próximo ID
      sequencial, data e hora, local afetado e uma descrição detalhada
      suficiente para reconstruir a mudança
-2. Aplico as edições diretamente nos arquivos-base da BibVânia Online
-   (edição cirúrgica, não reescrita estrutural), já com sua configuração
-   pública do Supabase inserida em `bibconfig.js`. Também gero ou atualizo
-   `.github/workflows/manter-supabase-ativo.yml`, o único YAML de manutenção,
-   sem incluir nenhuma chave privada.
-   **Obrigatoriamente executo o Contrato de metadados completos acima**,
-   tanto no fluxo de criação quanto no de atualização: gero os campos
-   ausentes, substituo valores da BibVânia-base pelos da biblioteca (inclusive autor, ano e
-   site do autor, conforme "Autoria: biblioteca derivada × projeto base"),
-   removo duplicidades e valido coerência entre HTML, JSON-LD, manifest,
-   robots, sitemap e documentação. A descrição escolhida (ou o fallback)
-   é aplicada de modo coerente no `title`/description, Open Graph, Twitter
-   e JSON-LD; o `admin.html` recebe seus metadados próprios e permanece
-   `noindex, nofollow`. Gero/atualizo `manifest.webmanifest`, `robots.txt`,
-   `sitemap.xml`, sem incluir o admin no sitemap, e aplico uma
-   CSP compatível com os recursos reais do projeto.
-3. Gero o `setup_private.sql` com suas chaves de API
-4. Gero ou atualizo `.github/workflows/manter-supabase-ativo.yml` com
-   agendamento periódico, `workflow_dispatch` e uma consulta pública leve ao
-   Supabase usando somente a URL e a chave `publishable` do `bibconfig.js`.
-   Nunca coloco chaves privadas no YAML.
-5. Gero `README.md` como cópia do da BibVânia Online, substituindo apenas
-   nome, links (repositório, GitHub Pages) e a linha "Desenvolvido por" do
-   cabeçalho pelos da sua biblioteca e do seu autor, e só onde o nome identifica
-   a biblioteca: onde o texto se refere à BibVânia Online como projeto base
-   (versão mais nova, atualização, arquivos-base, repositório oficial), o nome
-   permanece "BibVânia Online"
-   — o restante do conteúdo é mantido
-6. Gero `LICENCE.md` mantendo a mesma estrutura de seções do da
-   BibVânia Online (permissões/condições, "O que está coberto",
-   "Dependências de terceiros"), com a lista "O que está coberto" montada
-   com os arquivos que realmente existem na pasta da biblioteca (sem citar
-   arquivos que não existem, como `login.html`) e a tabela de dependências
-   completa (Supabase, ImgBB, Mistral AI, Supabase JS, pdfmake,
-   @zxing/library e Web Speech API), adaptando os textos de
-   permissões/condições conforme o tipo de licença informado —
-   inclusive para "Sem Licença" e "Domínio Público" (que não seguem
-   o formato Creative Commons, mas mantêm a mesma estrutura) — e
-   sempre incluindo ao final uma seção "Derivado da BibVânia Online" com
-   autor, ano, link do repositório e licença (CC-BY-SA 4.0) da BibVânia Online
-7. Gero `VERSION.json` com a versão base da BibVânia Online instalada e a
-   versão do seu projeto
-7.5. Gero o `CHANGELOG.md` próprio da biblioteca, na pasta do projeto,
-   começando assim: o título `# CHANGELOG — <Nome do Projeto>`, a
-   frase de apresentação e a seção `## Formatação` copiadas do
-   `CHANGELOG.md` da BibVânia Online (trocando só o nome do projeto),
-   e uma única entrada `#1`, no formato padrão, com a data e a hora
-   da geração e a versão inicial do projeto:
-
-   ```
-   #1 DD/MM/AAAA HH:MM:ss
-   Adição no arquivo `VERSION.json`
-   Descrição: Versão do projeto definida como X.Y. Em termos simples: a biblioteca foi criada na versão X.Y.
-   ```
-
-   (X.Y é o valor de "Versão do Projeto"). Nenhuma entrada do
-   `CHANGELOG.md` da BibVânia Online é copiada. A partir daí, toda
-   alteração feita na biblioteca (por mim, por outra IA ou pela
-   própria pessoa) é registrada nesse arquivo, com numeração própria,
-   sempre com o próximo ID, e cada mudança de versão do projeto vira
-   uma nova entrada igual à #1
-8. Gero (ou regenero, se já existia) o `bibconfig.claude` com todas
-   as respostas da entrevista — inclusive as chaves de API — para
-   você usar em futuras atualizações sem precisar repetir tudo
-9. Gero o `bibhash.sig` próprio da biblioteca, como último passo antes
-   de montar o `.zip`, com todos os arquivos da pasta do projeto já
-   finais (qualquer alteração depois disso exige gerar o hash de novo).
-   O hash cobre só a pasta do projeto — o `setup_private.sql` e o
-   `bibconfig.claude` ficam fora dela e fora do cálculo. Método exato:
-   dentro da pasta do projeto, sem o `bibhash.sig`, executo
-   `LC_ALL=C find . -type f | sort | xargs sha256sum | sha256sum` e
-   gravo os 64 caracteres hexadecimais com `echo -n`, sem quebra de
-   linha. Nunca copio o `bibhash.sig` da BibVânia Online base: a
-   biblioteca gerada sempre recebe o seu próprio hash
-10. Entrego tudo em um único `.zip`, nomeado igual à pasta do
-   projeto (ex.: projeto "Biblioteca João Silva" →
-   `biblioteca-joao-silva.zip`): uma pasta com o nome do seu
-   projeto contendo todos os arquivos da biblioteca — inclusive o
-   `bibmaker.claude` e o `bibmaker-logo.png` (você vai precisar deles
-   para atualizar a biblioteca no futuro), o `CHANGELOG.md` da
-   biblioteca e o `bibhash.sig`; e o `setup_private.sql` + `bibconfig.claude` soltos
-   na raiz do `.zip`, fora dessa pasta — assim, se você subir só a
-   pasta para o GitHub, nenhum dos dois vai com ela
-11. Junto com a entrega do `.zip`, aviso explicitamente sobre a
+2. Trabalhar numa cópia de trabalho dos arquivos-base, sem sobrescrever os
+   originais. Na atualização, mesclar a biblioteca derivada atual para preservar
+   código personalizado, imagens e arquivos próprios; resolver conflitos com a
+   pessoa antes de substituir conteúdo.
+3. Comparar `supabase_setup.sql` e os fontes atuais/novos `upload-imagem.ts` e
+   `vania-ia.ts`. Informar exatamente se há migração SQL e quais funções precisam
+   ser republicadas; preservar os Secrets já cadastrados e nunca pedir seus
+   valores. Antes de migração, orientar backup do banco pelo método disponível no
+   plano Supabase e solicitar autorização; não executar SQL nem deploy.
+4. **Obrigatoriamente executo o Contrato de metadados completos acima** em criação
+   e atualização: corrigir ausências/duplicidades; manter identidade e autoria da
+   biblioteca; validar HTML, JSON-LD, manifest, robots, sitemap, CSP e documentos.
+   A descrição deve ser coerente em title, description, Open Graph, Twitter e
+   JSON-LD; `admin.html` permanece `noindex, nofollow` e fora do sitemap.
+5. Manter o modelo Playwright completo no README, usando a URL pública da
+   biblioteca derivada em todos os trechos executáveis. Não criar pasta
+   `checkly/` nem arquivo separado de monitoramento; o agendamento é externo.
+6. Gerar o `README.md` como cópia adaptada do README-base: atualizar nome,
+   autoria, dados do projeto, URLs do repositório/Pages e a URL do exemplo
+   Checkly. Corrigir a descrição da escolha do nome (informado diretamente na
+   entrevista) e adaptar a seção de licença, mantendo claramente separadas a
+   licença das contribuições próprias, a atribuição/licença CC BY-SA 4.0 da base
+   e os termos de terceiros. Preservar referências deliberadas à BibVânia Online.
+7. Gerar `LICENCE.md` seguindo os títulos reais do arquivo-base: "Você tem
+   permissão para", "Sob as seguintes condições", "Escopo e arquivos desta
+   cópia-base" (adaptado à derivada) e "Serviços e componentes de terceiros".
+   Listar somente arquivos existentes, manter o aviso de proveniência não
+   comprovada dos ativos e atualizar a tabela completa de serviços/componentes
+   vigente na base, incluindo Claude e Web Speech API. Não afirmar que `sem` ou
+   `dominio` revoga licença/termos aplicáveis à base ou a terceiros.
+8. Gerar `VERSION.json` com versão-base e versão independente do projeto em
+   campos distintos; em atualização, incrementar a versão da própria biblioteca
+   em 0,1, salvo escolha explícita válida.
+8.5. Gerar o changelog próprio. Na criação, `#1` descreve o conjunto inicial de
+   arquivos/áreas criados ou personalizados e a versão inicial, não só
+   `VERSION.json`. Na atualização, preservar histórico e registrar todas as
+   mudanças reais em entradas sequenciais; usar data e hora local reais e nunca
+   ajustar manualmente o mtime.
+9. Gerar/regenerar `bibconfig.claude` com as respostas confirmadas, sem segredos.
+   Em atualização, manter a cópia anterior em backup privado até validar ZIP e
+   configuração nova; só depois substituir a cópia principal.
+10. Gerar `bibhash.sig` por último antes do ZIP, cobrindo apenas os arquivos da
+   pasta do projeto (sem a assinatura e sem `bibconfig.claude`) com
+   `LC_ALL=C find . -type f | sort | xargs sha256sum | sha256sum`. Gravar os 64
+   caracteres hexadecimais sem quebra de linha. Nunca copiar a assinatura da
+   base. Após compactar, extrair temporariamente e recalcular o hash; corrigir
+   divergência antes da entrega e informar o digest. Alterações manuais posteriores
+   exigem nova assinatura.
+11. Criar um slug único: minúsculas, sem acentos, somente letras ASCII `a-z` e
+   números `0-9`; converter espaços/pontuação em hífen, colapsar hífens repetidos
+   e remover hífens das pontas. Usar esse mesmo slug para a pasta `<slug>/` e
+   arquivo `<slug>.zip` (por exemplo, `biblioteca-joao-silva/` e
+   `biblioteca-joao-silva.zip`). O nome legível permanece nos metadados. O ZIP
+   contém a pasta da biblioteca e o `bibconfig.claude` privado separado na raiz;
+   nunca colocar o arquivo de configuração dentro da pasta publicável.
+12. Junto com a entrega do `.zip`, aviso explicitamente sobre a
    importância de nunca perder o `bibconfig.claude` (ver quadro
    "🚨 IMPORTANTE" logo abaixo) — não é um lembrete opcional a
    critério meu, é parte obrigatória da entrega
@@ -735,61 +979,78 @@ Ao final da entrevista:
 
 ## 🚨 IMPORTANTE — nunca perca o `bibconfig.claude`
 
-Esse arquivo é a **única cópia** das suas configurações e chaves de
-API. Ele não fica salvo em nenhum outro lugar — nem no repositório
-GitHub (de propósito, para não expor as chaves), nem em nenhum
+Esse arquivo é a **única cópia** das respostas da sua entrevista.
+Ele não fica salvo em nenhum outro lugar — nem no repositório
+GitHub (de propósito), nem em nenhum
 histórico do BibMaker ou do Claude entre conversas diferentes.
 
-Ele serve para as futuras atualizações, tanto da BibVânia Online base
-(uma nova versão dos arquivos-base) quanto da sua própria biblioteca
-derivada (nome, imagens, chaves, licença etc.), sempre sem refazer a
-entrevista. Para isso, anexe o `bibmaker.claude` e este arquivo e digite
-`BibMaker update`.
+Ele serve para futuras atualizações sem refazer a entrevista. Para atualizar,
+anexe `bibmaker.claude`, os arquivos-base completos novos, o pacote `.zip` ou a
+pasta completa da biblioteca derivada atual e este `bibconfig.claude`, depois
+digite `BibMaker update`. Confirme que o pacote atual inclui `VERSION.json`,
+`CHANGELOG.md`, `bibhash.sig` e as imagens personalizadas; identifique claramente
+qual arquivo é a base nova e qual é a biblioteca derivada atual.
 
 - **Se você perder o `bibconfig.claude`**, a única forma de atualizar
   a biblioteca no futuro é refazendo a entrevista completa do zero,
-  com todos os dados e chaves em mãos novamente (algumas não são
-  reexibidas pelo provedor depois de criadas — só é possível gerar
-  uma nova).
+  com todos os dados em mãos novamente. As chaves do ImgBB e da
+  Mistral AI não dependem dele: ficam nos Secrets do seu Supabase.
 - **Guarde-o em um lugar seguro fora do GitHub** — um gerenciador de
   senhas, um drive privado, ou qualquer local com backup que não seja
-  público. O mesmo vale para o `setup_private.sql`.
-- **Sempre que atualizar a biblioteca**, o `bibconfig.claude` é
-  regenerado com os dados mais recentes — troque a cópia salva pela
-  nova assim que a atualização terminar, para não ficar com uma
-  versão desatualizada guardada.
+  público.
+- **Sempre que atualizar a biblioteca**, o `bibconfig.claude` é regenerado.
+  Mantenha a versão antiga em backup privado até conferir a nova configuração e
+  o ZIP; depois substitua a cópia principal e mantenha também uma cópia privada
+  de segurança da versão nova.
 
-**Passos para deixar sua biblioteca no ar — siga nesta ordem:**
+**Passos de configuração e publicação (criação ou atualização) — siga nesta ordem:**
 
 **1. Configurar o projeto Supabase correto**
 - Entre no painel do Supabase e abra exatamente o projeto cuja URL você
   forneceu na entrevista do BibMaker.
-- Vá a **SQL Editor → New query**, cole o arquivo completo
-  `supabase_setup.sql` e clique em **Run**. Aguarde a execução terminar
-  e confira se o painel não mostra erro. Esse passo cria as tabelas,
-  políticas RLS, índices, funções e regras de reservas necessárias.
-- Depois, abra uma nova consulta e execute o `setup_private.sql` gerado.
-  Ele grava as chaves privadas do ImgBB e da Mistral AI na tabela privada.
+- **Criação nova:** vá a **SQL Editor → New query**, cole o conteúdo completo
+  de `supabase_setup.sql`, clique em **Run** e confira se terminou sem erro.
+  **Atualização:** não execute o arquivo completo às cegas num banco existente.
+  Use a comparação entregue pelo BibMaker e aplique somente a migração necessária,
+  depois de fazer backup do banco pelo método disponível no seu plano Supabase e
+  revisar/autorizar a operação. Se não houver alteração SQL, não execute SQL.
+- As chaves do ImgBB e da Mistral AI NÃO vão para o banco: são cadastradas
+  como Secrets das Edge Functions, no passo 2.
 - No arquivo público `bibconfig.js`, confirme que `SUPABASE_URL` e
   `SUPABASE_PUBLISHABLE_KEY` apontam para esse mesmo projeto Supabase.
   Use somente a chave `sb_publishable_` no frontend; nunca coloque
   chave `secret` ou `service_role` no código publicado.
-- ⚠️ `setup_private.sql` contém chaves privadas. Nunca o publique no
-  GitHub nem o envie dentro da pasta pública do site.
+- ⚠️ Nenhum arquivo do site pode conter chaves privadas. Elas ficam só nos
+  Secrets do Supabase.
 
-**2. Criar o usuário e cadastrar o nome exibido no painel**
-- No mesmo projeto Supabase, vá a **Authentication → Users → Add user →
-  Create new user**, informe o e-mail e uma senha forte e clique em
-  **Create User**.
-- Na lista de usuários, copie o **User UID** do usuário recém-criado.
+**2. Cadastrar Secrets e publicar/atualizar as Edge Functions**
+As chaves ImgBB/Mistral ficam somente como **Secrets** do projeto Supabase; não
+as cole na conversa nem em arquivos. Na primeira instalação, cadastre
+`IMGBB_API_KEY`, `MISTRAL_API_KEY` e, opcionalmente, `MISTRAL_MODEL` (padrão
+`ministral-14b-2512`). Em atualização, preserve os Secrets existentes e não os
+recrie sem necessidade. Compare os arquivos raiz `upload-imagem.ts` e `vania-ia.ts`
+com as versões implantadas: publique novamente cada função cujo fonte mudou,
+mantendo o nome exato e **Verify JWT desligado** (a função valida a sessão).
+Se nenhum fonte mudou, registre que não é necessário redeploy. Depois de publicar
+o site, teste o upload de uma imagem e o botão Vânia; em caso de erro, confira
+nome da função e Secrets antes de concluir.
+- Nunca informe essas chaves na conversa com o Claude nem as coloque em arquivos
+  do site.
+
+**3. Criar ou manter o usuário bibliotecário**
+- Em uma criação nova, crie a conta conforme abaixo. Em atualização, mantenha
+  a conta bibliotecária existente no projeto Supabase de destino e não crie outra.
+  Só crie uma conta se não houver usuário que deva administrar essa biblioteca.
+- **Somente para criar uma conta:** no projeto Supabase correto, vá a
+  **Authentication → Users → Add user → Create new user**, informe o e-mail e
+  uma senha forte e clique em **Create User**. Copie o **User UID** dessa conta.
+- Para as consultas opcionais abaixo, use o **User UID** da conta existente ou
+  recém-criada; no SQL Editor, substitua `UUID_DO_USUARIO` e execute apenas a
+  ação desejada, uma por vez.
 - O username (nome exibido) é opcional: aparece no painel como "OI, nome!" (só o primeiro nome) e fica
   no `user_metadata` do usuário (sem tabela própria); sem username, o painel mostra
   "OLÁ, ADMIN!". Para entrar, o bibliotecário usa e-mail e senha; a foto de perfil é
   enviada pelo próprio painel.
-- Oriente o usuário a abrir o **SQL Editor** e rodar, **uma por vez**, só a ação
-  desejada (trocando `UUID_DO_USUARIO` pelo User UID):
-
-  Para cada ação abaixo, substitua `UUID_DO_USUARIO` pelo valor da coluna **User UID** (*Authentication → Users*) e execute **uma por vez**:
 
   **Colocar o username** (quando ainda não há nome definido):
 
@@ -815,23 +1076,30 @@ entrevista. Para isso, anexe o `bibmaker.claude` e este arquivo e digite
   SELECT id, email, raw_user_meta_data->>'nome' AS nome FROM auth.users WHERE id = 'UUID_DO_USUARIO';
   ```
 
-- Se o usuário pedir para trocar ou excluir o username depois, use as ações
-  correspondentes acima. Excluir o username não apaga a foto nem altera o login.
-
-**3. Publicar no GitHub Pages**
+**4. Publicar no GitHub Pages**
 - Crie ou abra um repositório público no GitHub.
+- Em atualização, mantenha uma cópia/backup da versão publicada antes de substituir
+  os arquivos e publique apenas depois de revisar a lista de migrações e redeploy
+  entregue pelo BibMaker.
 - Descompacte o ZIP e envie para a **raiz** do repositório o conteúdo da
   pasta do projeto — incluindo `index.html`, `admin.html`, `bibconfig.js`
   e `bibcore.js`. Envie os arquivos, não o ZIP como arquivo.
-- **Não envie** `setup_private.sql` nem `bibconfig.claude`: eles ficam
-  soltos fora da pasta do projeto no ZIP e contêm dados privados.
+- **Não envie** o `bibconfig.claude`: ele fica solto fora da pasta do projeto
+  no ZIP e guarda dados privados. Os arquivos-fonte `upload-imagem.ts` e `vania-ia.ts` vão junto
+  (não tem segredos).
 - No repositório, abra **Settings → Pages → Build and deployment**,
   escolha **Deploy from a branch**, branch `main` e pasta `/ (root)`,
   e clique em **Save**. Aguarde o GitHub concluir a publicação.
 - Abra a URL do GitHub Pages: teste primeiro se o catálogo carrega e,
   depois, entre em `admin.html` com o e-mail e a senha criados no Supabase.
+- Na validação final, confirme também upload de uma imagem e execução do botão
+  Vânia na URL pública. Só considere concluído depois dos testes do catálogo,
+  login, upload e Vânia; mantenha o backup até a confirmação.
+- Prefira uma conta do GitHub (ou domínio) **sem outros sites publicados**: todos os
+  sites de `usuario.github.io` compartilham a mesma origem, e o login do painel
+  fica guardado no navegador dessa origem.
 
-💾 Guarde `bibconfig.claude` e `setup_private.sql` em local privado e seguro,
+💾 Guarde o `bibconfig.claude` em local privado e seguro,
 fora do GitHub. O `bibconfig.claude` é necessário para atualizar a biblioteca
 no futuro sem refazer a entrevista.
 
@@ -843,19 +1111,21 @@ e os testes do catálogo e do painel funcionarem.
 ## 📄 Modelo do bibconfig.claude
 
 Gerado/regenerado ao final da entrevista, com todas as respostas
-dadas (inclusive as chaves de API):
+dadas:
 
 ```markdown
 # bibconfig.claude
 **Configuração salva desta biblioteca — gerado automaticamente pelo bibmaker.claude**
 
-⚠️ Este arquivo contém chaves de API privadas. Nunca publique-o no
-GitHub nem o compartilhe. Fica fora da pasta principal do projeto,
-junto com o setup_private.sql, exatamente pelo mesmo motivo.
+⚠️ Este arquivo guarda as respostas da sua entrevista (dados privados).
+Nunca publique-o no GitHub nem o compartilhe. Fica fora da pasta
+principal do projeto, exatamente pelo mesmo motivo.
 
-Para atualizar esta biblioteca no futuro, abra o bibmaker.claude
-numa conversa com o Claude, anexe este arquivo e digite o comando
-BibMaker update — não é necessário preencher a entrevista de novo.
+Para atualizar esta biblioteca no futuro, abra o `bibmaker.claude` numa conversa
+com o Claude, anexe este arquivo, o pacote/pasta completo desta biblioteca e os
+arquivos-base completos novos; digite `BibMaker update`. Não é necessário refazer
+os campos já preenchidos, mas eles serão confirmados. Mantenha este arquivo fora
+do GitHub.
 
 ---
 
@@ -871,7 +1141,7 @@ Nome da Escola: <!-- nome oficial sem repetir a sigla; Ex.: Professora Maria Vâ
 Nome da Biblioteca: <!-- nome oficial; para comunitária -->
 
 ## 2. Imagens da Biblioteca
-<!-- Registre o caminho usado e as dimensões reais verificadas, nunca apenas o nome. -->
+<!-- Registre o caminho usado e as dimensões reais verificadas, nunca apenas o nome. Caminhos não incluem os binários; em update anexe também o pacote atual com as imagens. -->
 Logo: <!-- caminho ou nome do arquivo. Exemplo: logo.png -->
 Dimensões confirmadas da logo: <!-- largura × altura px. Exemplo: 1800 × 1080 px -->
 Proporção da logo: <!-- proporção. Exemplo: 5:3 -->
@@ -882,12 +1152,10 @@ OG Image: <!-- caminho ou nome do arquivo. Exemplo: og-image.png -->
 Dimensões confirmadas da OG Image: <!-- largura × altura px. Exemplo: 1200 × 630 px -->
 Proporção da OG Image: <!-- proporção. Exemplo: 40:21 -->
 
-## 3. Chaves de API
-<!-- Preencha com as chaves reais somente neste arquivo privado; nunca use os exemplos. -->
+## 3. Supabase
+<!-- Apenas a Project URL e a chave pública sb_publishable_. Nunca guardar secret/service_role. ImgBB/Mistral são Secrets das Edge Functions. -->
 URL do Supabase: <!-- URL do projeto. Exemplo: https://abcdefghijklmnop.supabase.co -->
 Chave Publishable do Supabase: <!-- chave sb_publishable_ real. Exemplo: sb_publishable_EXEMPLO_NAO_UTILIZAR -->
-Chave do ImgBB: <!-- chave real do ImgBB. Exemplo fictício: 0123456789abcdef0123456789abcdef -->
-Chave da Mistral AI: <!-- chave real da Mistral (letras e números, sem prefixo fixo). Exemplo fictício: EXEMPLO_NAO_UTILIZAR -->
 
 ## 4. Dados do Projeto
 Nome do Projeto: <!-- nome exibido na biblioteca. Exemplo: Biblioteca Maria Vânia -->
@@ -900,9 +1168,10 @@ Descrição para compartilhamento/Open Graph: <!-- frase curta; exemplo: Pesquis
 ### Licença
 Tipo de Licença: <!-- com, sem ou dominio. Exemplo: com -->
 Nome da Licença: <!-- nome oficial; exemplo: Creative Commons Atribuição-CompartilhaIgual 4.0 Internacional -->
-Versão da Licença: <!-- formato x.y; exemplo: 4.0 -->
-Descrição da Licença: <!-- texto ou resumo autorizado; exemplo: Permite compartilhar e adaptar com atribuição. -->
-URL da Licença: <!-- URL oficial; exemplo: https://creativecommons.org/licenses/by-sa/4.0/deed.pt-BR -->
+Versão da Licença: <!-- x.y somente se aplicável; exemplo: 4.0 -->
+Descrição da Licença: <!-- escopo e texto confirmado; diferenciar material próprio do material herdado -->
+URL da Licença: <!-- URL oficial quando houver; não inventar -->
+Escopo/Confirmação: <!-- o que a escolha cobre; material da BibVânia Online permanece sujeito a CC BY-SA 4.0 e terceiros às próprias licenças -->
 
 ## 5. GitHub
 URL do Repositório: <!-- URL pública do repositório; exemplo: https://github.com/ruanolima/biblioteca-maria-vania -->

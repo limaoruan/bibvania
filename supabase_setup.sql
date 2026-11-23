@@ -8,8 +8,8 @@
 --   tabelas, tipos, funções, políticas RLS e triggers.
 --   Este arquivo é SEGURO para commitar no GitHub (não contém segredos).
 --
--- PRÉ-REQUISITO
---   Execute este arquivo ANTES de setup_private.sql.
+-- CHAVES DE API (ImgBB e Mistral AI)
+--   Não ficam no banco: são Secrets das Edge Functions (ver a seção 10 abaixo).
 --
 -- COMO EXECUTAR
 --   1. Acesse o Dashboard do Supabase → SQL Editor → New query
@@ -27,14 +27,12 @@
 --   pessoas         — Cadastro de alunos, visitantes e funcionários (nome, sexo,
 --                     tipo, ano_aluno, turma_aluno, pcd, data_cadastro)
 --   reservas        — Solicitações de reserva, status e snapshot da pessoa
---   config_privada  — Chaves de API (imgbb_api_key, mistral_api_key)
---                     com RLS: somente usuários autenticados leem
 --
 -- SEGURANÇA (RLS)
 --   • livros: leitura pública; escrita autenticada
 --   • emprestimos, pessoas, reservas: leitura e escrita só autenticado
 --   • funções públicas de reserva expõem somente perfil mínimo e operações validadas
---   • config_privada: somente usuários autenticados leem
+--   • chaves de API: fora do banco (Secrets das Edge Functions)
 --
 -- TRIGGERS / FUNÇÕES
 --   • recalcular_disponivel(): atualiza quantidade_disponivel após mudanças
@@ -352,28 +350,26 @@ END $$;
 -- ORDER BY tablename;
 
 -- ============================================================================
--- 10. CONFIGURAÇÕES PRIVADAS (chaves de API)
--- Acessível apenas por usuários autenticados (admin).
--- ATENÇÃO: Execute setup_private.sql separadamente para inserir
--- as chaves reais. Esse arquivo NÃO vai para o GitHub.
+-- 10. CHAVES DE API (ImgBB e Mistral AI) — agora nos Secrets das Edge Functions
 -- ============================================================================
+-- As chaves NÃO ficam mais no banco nem chegam ao navegador. Elas são guardadas em
+-- Supabase → Edge Functions → Secrets (IMGBB_API_KEY e MISTRAL_API_KEY) e usadas só pelas
+-- Edge Functions upload-imagem e vania-ia (arquivos upload-imagem.ts e vania-ia.ts na raiz).
+--
+-- Bancos criados por versões anteriores têm a tabela config_privada com as chaves. O bloco
+-- abaixo fecha o acesso do navegador a ela (sem apagar nada). Depois de publicar as funções
+-- e conferir que o painel envia capas e que a Vânia analisa, apague a tabela de vez:
+--     DROP TABLE IF EXISTS public.config_privada;
 
-CREATE TABLE IF NOT EXISTS config_privada (
-    chave TEXT PRIMARY KEY,
-    valor TEXT NOT NULL
-);
-
--- RLS ligado em config_privada (chaves de API do ImgBB e da Mistral AI): só o admin
--- autenticado consegue ler; o visitante anônimo não vê nada.
-ALTER TABLE config_privada ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Somente autenticados leem config_privada" ON config_privada;
-CREATE POLICY "Somente autenticados leem config_privada"
-    ON config_privada FOR SELECT TO authenticated
-    USING ((select auth.uid()) IS NOT NULL);
-
--- Ninguém (nem autenticado) pode inserir/alterar/deletar via API
--- Só você pelo Dashboard do Supabase
+DO $$
+BEGIN
+    IF to_regclass('public.config_privada') IS NOT NULL THEN
+        EXECUTE 'DROP POLICY IF EXISTS "Somente autenticados leem config_privada" ON public.config_privada';
+        EXECUTE 'DROP POLICY IF EXISTS "Somente admins leem config_privada" ON public.config_privada';
+        EXECUTE 'ALTER TABLE public.config_privada ENABLE ROW LEVEL SECURITY';
+        EXECUTE 'REVOKE ALL ON TABLE public.config_privada FROM anon, authenticated';
+    END IF;
+END $$;
 
 -- ============================================================================
 -- 11. PERFIL DO ADMIN (nome e foto)
@@ -1073,15 +1069,6 @@ CREATE POLICY "Cancelamento autenticado de reservas" ON public.reservas
     FOR UPDATE TO authenticated
     USING ((select auth.uid()) IS NOT NULL AND status = 'pendente')
     WITH CHECK (status = 'cancelada');
-
--- Chaves privadas podem ser lidas por qualquer usuário autenticado (cadastro público desativado).
-DROP POLICY IF EXISTS "Somente admins leem config_privada" ON public.config_privada;
-DROP POLICY IF EXISTS "Somente autenticados leem config_privada" ON public.config_privada;
-CREATE POLICY "Somente autenticados leem config_privada"
-    ON public.config_privada FOR SELECT TO authenticated
-    USING ((select auth.uid()) IS NOT NULL);
-REVOKE ALL ON TABLE public.config_privada FROM anon;
-GRANT SELECT ON TABLE public.config_privada TO authenticated;
 
 -- Avisa a API REST do Supabase (PostgREST) para recarregar o esquema agora, de modo que as
 -- novas funções e políticas valham sem esperar.

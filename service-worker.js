@@ -11,26 +11,31 @@
  *     Mistral AI, CDNs e qualquer outra origem passam direto, sem cache:
  *     dados do acervo, reservas e login NUNCA ficam guardados aqui.
  *   • Estratégia "rede primeiro": tenta sempre a versão mais nova na rede e
- *     só usa o cache quando estiver offline. Assim, publicar uma versão nova
- *     no GitHub Pages chega ao usuário sem precisar trocar o nome do cache.
+ *     só usa o cache quando estiver offline.
  *
  * QUANDO MEXER AQUI
  *   • Mudou a lista de arquivos da casca? Atualize SHELL.
- *   • Quer forçar a limpeza do cache de todos os aparelhos? Troque o número
- *     de CACHE (ex.: v4 → v5); o evento "activate" apaga os caches antigos.
+ *   • A versão de CACHE acompanha a versão do projeto-base menos 2,4
+ *     (projeto 3.1 → cache v0.7). Ao mudar a versão-base, atualize este número;
+ *     o evento "activate" apaga os caches antigos deste escopo.
  *
  * REGISTRO: feito por index.html e admin.html (navigator.serviceWorker.register).
  * ===========================================================================
  */
 
-// Nome (e versão) do cache da casca. Mudar o nome invalida o cache antigo.
-const CACHE = 'bibvania-shell-v4';
+// Escopo deste site (ex.: "/minha-biblioteca/"). Sites do mesmo usuário no GitHub Pages compartilham a mesma origem e,
+// portanto, o mesmo armazenamento de caches; o escopo entra no nome do cache para um site nunca apagar o de outro.
+const ESCOPO = new URL(self.registration.scope).pathname;
+
+// Regra: versão do cache = versão do projeto-base − 2,4 (3.1 − 2,4 = 0.7).
+// Mudar o nome/versionamento faz o activate remover o cache antigo deste escopo.
+const CACHE = 'bibvania-shell-v0.7@' + ESCOPO;
 
 // Arquivos pré-carregados na instalação. Se um deles não existir (404),
 // cache.addAll falha e o service worker não é instalado: mantenha a lista
 // sincronizada com os arquivos reais do projeto.
 const SHELL = [
-  './', 'index.html', 'admin.html', 'bibconfig.js', 'bibcore.js', 'style.css',
+  './', 'index.html', 'admin.html', 'bibconfig.js', 'bibcore.js', 'style.css', 'van-ia.prompt',
   'manifest.webmanifest', 'favicon.ico', 'favicon-16.png', 'favicon-32.png',
   'favicon-48.png', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png',
   'logo.png', 'og-image.png'
@@ -43,11 +48,12 @@ self.addEventListener('install', event => {
   self.skipWaiting();
 });
 
-// ACTIVATE: apaga caches de versões anteriores (qualquer nome diferente de
-// CACHE) e assume o controle das abas já abertas (clients.claim).
+// ACTIVATE: apaga os caches de versões anteriores DESTE site (os de bibliotecas de outro escopo, na mesma origem,
+// ficam intactos; o nome antigo, sem "@", também é apagado) e assume o controle das abas já abertas (clients.claim).
 self.addEventListener('activate', event => {
+  const seu = key => key.startsWith('bibvania-shell-') && (!key.includes('@') || key.endsWith('@' + ESCOPO));
   event.waitUntil(caches.keys().then(keys => Promise.all(
-    keys.filter(key => key !== CACHE).map(key => caches.delete(key))
+    keys.filter(key => seu(key) && key !== CACHE).map(key => caches.delete(key))
   )).then(() => self.clients.claim()));
 });
 

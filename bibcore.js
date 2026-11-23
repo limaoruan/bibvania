@@ -22,7 +22,7 @@
  * com chamadas síncronas de outros scripts inline.
  *
  * @author  Ruan Oliveira Lima <https://www.instagram.com/ruanoliveiralima_/>
- * @version 3.0
+ * @version 3.1
  * @year    2026
  * @license CC-BY-SA-4.0 <https://creativecommons.org/licenses/by-sa/4.0/>
  * @source  https://github.com/limaoruan/bibvania
@@ -502,6 +502,21 @@ const DB = {
     CATEGORIAS: CATEGORIAS_FIXAS,
     supabase: supabase,
 
+    // Remove hashtags etárias da busca e devolve as faixas correspondentes.
+    // Mais de uma hashtag seleciona a união das faixas; o texto restante segue como busca normal.
+    extrairFiltroClassificacao(consulta) {
+        const porCodigo = {
+            '00': 'LIVRE', '06': '6 ANOS', '10': '10 ANOS', '12': '12 ANOS',
+            '14': '14 ANOS', '16': '16 ANOS', '18': '18 ANOS'
+        };
+        const categorias = new Set();
+        const texto = String(consulta ?? '').replace(/(^|\s)#(00|06|10|12|14|16|18)(?=$|\s)/gi, (_match, espaco, codigo) => {
+            categorias.add(porCodigo[codigo]);
+            return espaco;
+        }).replace(/\s+/g, ' ').trim();
+        return { termo: texto, categorias: [...categorias] };
+    },
+
     /**
      * _fetchAll(query): Função utilitária interna para buscar TODOS os registros de uma tabela,
      * contornando o limite padrão de 1000 registros do Supabase através de paginação automática.
@@ -534,9 +549,9 @@ const DB = {
         const { error } = await supabase.auth.signOut();
         if (error) throw error;
         sessionStorage.removeItem('bibvania_tab');
-        localStorage.removeItem('bibvania_admin_nome');
-        localStorage.removeItem('bibvania_admin_semnome');
-        localStorage.removeItem('bibvania_ultima_atividade');
+        localStorage.removeItem(globalThis.BIBVANIA_CHAVE('admin_nome'));
+        localStorage.removeItem(globalThis.BIBVANIA_CHAVE('admin_semnome'));
+        localStorage.removeItem(globalThis.BIBVANIA_CHAVE('ultima_atividade'));
         // admin.html trata o login como overlay embutido na própria página;
         // quem chamar signOut() é responsável por mostrar esse overlay.
     },
@@ -560,7 +575,7 @@ const DB = {
         }
         if (!session) {
             sessionStorage.removeItem('bibvania_tab');
-            localStorage.removeItem('bibvania_admin_nome');
+            localStorage.removeItem(globalThis.BIBVANIA_CHAVE('admin_nome'));
             // Sem redirecionamento: o login é um overlay do admin.html (não existe login.html).
             // Quem chamar checkAuth() decide o que mostrar quando o retorno for null.
             return null;
